@@ -1,5 +1,3 @@
-import { Listener } from "./Listener";
+import { Listener } from "./listener";
 
 const listener = new Listener();
-
-console.log("listener started");
