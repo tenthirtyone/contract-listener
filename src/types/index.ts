@@ -15,3 +15,38 @@ export type ListenerOptions = {
 export type Webhook = {
   url: string;
 };
+
+export type Event = {
+  blockNumber: number;
+  blockHash: string;
+  address: string;
+  transactionHash: string;
+  event: string;
+  args: any;
+};
+
+interface ParsedEvent {
+  blockNumber: number;
+  blockHash: string;
+  address: string;
+  transactionHash: string;
+  event: string;
+  data: any;
+}
+
+export interface TokenMintEvent extends ParsedEvent {
+  data: {
+    to: string;
+    tokenId: number;
+    cid: string;
+  };
+}
+export interface TransferSingleEvent extends ParsedEvent {
+  data: {
+    operator: string;
+    from: string;
+    to: string;
+    tokenId: number;
+    value: number;
+  };
+}

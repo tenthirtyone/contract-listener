@@ -1,26 +1,23 @@
 import { createLogger } from "@/logger";
+import { Event, TransferSingleEvent } from "@/types";
 
 const logger = createLogger("TransferSingle");
 
-export const TransferSingle = (evt) => {
+export const TransferSingle = (evt: Event): TransferSingleEvent => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const operator = args[0];
   const from = args[1];
   const to = args[2];
-  const id = args[3].toNumber();
+  const tokenId = args[3].toNumber();
   const value = args[4].toNumber();
 
-  const data = {
+  const data: TransferSingleEvent = {
     blockNumber,
     blockHash,
     address,
     transactionHash,
     event,
-    operator,
-    from,
-    to,
-    id,
-    value,
+    data: { operator, from, to, tokenId, value },
   };
 
   logger.info(data);
