@@ -3,7 +3,11 @@ const { compilerOptions } = require("./tsconfig.json");
 
 module.exports = {
   roots: ["<rootDir>/tests"],
-  testMatch: ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
+  testMatch: [
+    "**/tests/**/*.+(ts|tsx|js)",
+    "**/?(*.)+(spec|test).+(ts|tsx|js)",
+  ],
+
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },

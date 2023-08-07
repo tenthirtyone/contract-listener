@@ -1,8 +1,9 @@
-import { TokenMint, TransferSingle } from "./events";
+import { ProxyDeployed, TokenMint, TransferSingle } from "./events";
 import { EventParser as TEventParser } from "@/types";
 
 export function createEventParser(): TEventParser {
   return {
+    ProxyDeployed,
     TokenMint,
     TransferSingle,
   };
@@ -11,6 +12,7 @@ export function createEventParser(): TEventParser {
 export class EventParser {
   static create() {
     return {
+      ProxyDeployed,
       TokenMint,
       TransferSingle,
     };

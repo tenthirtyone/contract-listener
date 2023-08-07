@@ -5,7 +5,7 @@ export type Contract = {
 };
 
 export type EventParser = {
-  [key: string]: (evt: any) => Object;
+  [key: string]: (evt: any, eventListener?: any) => Object;
 };
 
 export type ListenerOptions = {
@@ -25,7 +25,7 @@ export type Event = {
   args: any;
 };
 
-interface ParsedEvent {
+export interface ParsedEvent {
   blockNumber: number;
   blockHash: string;
   address: string;
@@ -41,6 +41,11 @@ export interface TokenMintEvent extends ParsedEvent {
     cid: string;
   };
 }
+export interface ProxyDeployedEvent extends ParsedEvent {
+  data: {
+    address: string;
+  };
+}
 export interface TransferSingleEvent extends ParsedEvent {
   data: {
     operator: string;
@@ -50,3 +55,7 @@ export interface TransferSingleEvent extends ParsedEvent {
     value: number;
   };
 }
+
+export type EthereumAddress = string;
+
+export type DatabaseKey = EthereumAddress | `${EthereumAddress}:${number}`;
