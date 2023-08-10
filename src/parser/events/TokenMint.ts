@@ -3,7 +3,7 @@ import { Event, TokenMintEvent } from "@/types";
 
 const logger = createLogger("TokenMint");
 
-export const TokenMint = (evt: Event): TokenMintEvent => {
+export const TokenMint = async (evt: Event): Promise<TokenMintEvent> => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const to = args[0];
   const tokenId = args[1].toNumber();

@@ -32,6 +32,9 @@ export interface ParsedEvent {
   transactionHash: string;
   event: string;
   data: any;
+  transaction?: any;
+  receipt?: any;
+  price?: number;
 }
 
 export interface TokenMintEvent extends ParsedEvent {

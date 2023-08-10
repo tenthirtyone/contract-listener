@@ -2,10 +2,12 @@
 
 import { createLogger } from "@/logger";
 import { Event, ProxyDeployedEvent } from "@/types";
-import { abi } from "@/data/TokenABI"
+
 const logger = createLogger("ProxyDeployed");
 
-export const ProxyDeployed = (evt: Event, eventListener: any): ProxyDeployedEvent => {
+const TYPE = "ERC1155";
+
+export const ProxyDeployed = async (evt: Event, eventListener: any): Promise<ProxyDeployedEvent> => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const proxyAddress = args[0];
 
@@ -19,8 +21,7 @@ export const ProxyDeployed = (evt: Event, eventListener: any): ProxyDeployedEven
   };
 
   logger.info(data);
-  console.log(eventListener)
 
-  eventListener.addContract(proxyAddress, abi);
+  await eventListener.addContract(proxyAddress, TYPE);
   return data;
 };
