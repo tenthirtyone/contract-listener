@@ -9,6 +9,7 @@ import {
   EthereumAddress,
 } from "@/types";
 import { post } from "@/http";
+import { getTransactionData } from "@/utils";
 import { createEventParser } from "@/parser";
 import { createPoller } from "@/poller";
 import { createLogger } from "@/logger";
@@ -71,7 +72,8 @@ export class Listener {
       );
       try {
         if (this._parser[event.event]) {
-          const data = await this._parser[event.event](event, this);
+          const { transaction, receipt } = await getTransactionData(event.transactionHash);
+          const data = await this._parser[event.event](event, this, transaction, receipt);
           this._webhooks.forEach((hook) => post(hook.url, data));
         }
       } catch (e) {
@@ -81,13 +83,13 @@ export class Listener {
   }
 
   async addContract(address, type) {
-    const contract = new ethers.Contract(
-      address,
-      ABIs[type],
-      this._provider
-    );
     try {
       await this._saveContract(address, type);
+      const contract = new ethers.Contract(
+        address,
+        ABIs[type],
+        this._provider
+      );
       this.createEventListener(contract);
       this._contracts.push(contract);
     } catch (e) {

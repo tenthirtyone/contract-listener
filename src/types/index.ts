@@ -5,7 +5,7 @@ export type Contract = {
 };
 
 export type EventParser = {
-  [key: string]: (evt: any, eventListener?: any) => Object;
+  [key: string]: (evt: any, eventListener: any, transaction: any, receipt: any) => Object;
 };
 
 export type ListenerOptions = {

@@ -4,7 +4,7 @@ import { Event, TransferSingleEvent } from "@/types";
 
 const logger = createLogger("TransferSingle");
 
-export const TransferSingle = async (evt: Event, eventListener: any): Promise<TransferSingleEvent> => {
+export const TransferSingle = async (evt: Event, eventListener: any, transaction: any, receipt: any): Promise<TransferSingleEvent> => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const operator = args[0];
   const from = args[1];
@@ -12,7 +12,6 @@ export const TransferSingle = async (evt: Event, eventListener: any): Promise<Tr
   const tokenId = args[3].toNumber();
   const value = args[4].toNumber();
 
-  const { transaction, receipt } = await getTransactionData(transactionHash);
   const price = eventListener.price;
 
   const data: TransferSingleEvent = {
