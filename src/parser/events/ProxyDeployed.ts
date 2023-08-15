@@ -11,6 +11,8 @@ export const ProxyDeployed = async (evt: Event, eventListener: any, transaction:
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const proxyAddress = args[0];
 
+  await eventListener.addContract(proxyAddress, TYPE);
+
   const price = eventListener.price;
 
   const data: ProxyDeployedEvent = {
@@ -27,6 +29,5 @@ export const ProxyDeployed = async (evt: Event, eventListener: any, transaction:
 
   logger.info(data);
 
-  await eventListener.addContract(proxyAddress, TYPE);
   return data;
 };

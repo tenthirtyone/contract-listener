@@ -84,13 +84,13 @@ export class Listener {
 
   async addContract(address, type) {
     try {
-      await this._saveContract(address, type);
       const contract = new ethers.Contract(
         address,
         ABIs[type],
         this._provider
       );
       this.createEventListener(contract);
+      await this._saveContract(address, type);
       this._contracts.push(contract);
     } catch (e) {
       console.error(e);
