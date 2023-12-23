@@ -5,11 +5,26 @@ export type Contract = {
 };
 
 export type EventParser = {
-  [key: string]: (evt: any, eventListener: any, transaction: any, receipt: any) => Object;
+  [key: string]: (
+    evt: any,
+    eventListener: any,
+    transaction: any,
+    receipt: any,
+    context: EnvironmentContext
+  ) => Object;
+};
+
+type EnvironmentContext = {
+  prisma: any;
+  opensearch: any;
+  seaport: any;
 };
 
 export type ListenerOptions = {
   providerUrl: string;
+  opensearchUser: string;
+  opensearchPass: string;
+  opensearchNode: string;
 };
 
 export type Webhook = {

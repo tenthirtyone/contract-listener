@@ -1,4 +1,11 @@
-import { ProxyDeployed, TokenMint, TransferSingle } from "./events";
+import {
+  ProxyDeployed,
+  TokenMint,
+  TransferSingle,
+  OrderFulfilled,
+  OrdersMatched,
+  OrderCancelled,
+} from "./events";
 import { EventParser as TEventParser } from "@/types";
 
 export function createEventParser(): TEventParser {
@@ -6,6 +13,9 @@ export function createEventParser(): TEventParser {
     ProxyDeployed,
     TokenMint,
     TransferSingle,
+    OrderFulfilled,
+    OrdersMatched,
+    OrderCancelled,
   };
 }
 
@@ -15,6 +25,9 @@ export class EventParser {
       ProxyDeployed,
       TokenMint,
       TransferSingle,
+      OrderFulfilled,
+      OrdersMatched,
+      OrderCancelled,
     };
   }
 }

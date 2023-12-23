@@ -13,9 +13,11 @@ exports.ProxyDeployed = void 0;
 const logger_1 = require("@/logger");
 const logger = (0, logger_1.createLogger)("ProxyDeployed");
 const TYPE = "ERC1155";
-const ProxyDeployed = (evt, eventListener) => __awaiter(void 0, void 0, void 0, function* () {
+const ProxyDeployed = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
     const proxyAddress = args[0];
+    yield eventListener.addContract(proxyAddress, TYPE);
+    const price = eventListener.price;
     const data = {
         blockNumber,
         blockHash,
@@ -23,9 +25,11 @@ const ProxyDeployed = (evt, eventListener) => __awaiter(void 0, void 0, void 0, 
         transactionHash,
         event,
         data: { address: proxyAddress },
+        transaction,
+        receipt,
+        price
     };
     logger.info(data);
-    yield eventListener.addContract(proxyAddress, TYPE);
     return data;
 });
 exports.ProxyDeployed = ProxyDeployed;

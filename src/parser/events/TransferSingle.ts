@@ -26,7 +26,7 @@ export const TransferSingle = async (evt: Event, eventListener: any, transaction
     price
   };
 
-  logger.info(data);
+  logger.info(data.data);
 
   return data;
 };
