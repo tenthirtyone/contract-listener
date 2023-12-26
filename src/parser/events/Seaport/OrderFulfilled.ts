@@ -1,4 +1,4 @@
-import { createLogger } from "@/logger";
+import { createLogger } from "../../../logger";
 import { Event, TransferSingleEvent } from "@/types";
 
 const logger = createLogger("Seaport-OrderFulfilled");
@@ -17,6 +17,7 @@ export const OrderFulfilled = async (
     args;
 
   logger.info(`tx:${transactionHash} | order:${orderHash}`);
+
   await fulfillSeaportOrder(orderHash);
 
   const offers = rawOffers.map((offer) => {
@@ -69,6 +70,12 @@ export const OrderFulfilled = async (
 
   async function fulfillSeaportOrder(orderHash: string) {
     try {
+      const beforeCount = await prisma.seaportOrder.count({
+        where: {
+          fulfilled: true,
+        },
+      });
+
       await prisma.seaportOrder.update({
         where: {
           order_hash: orderHash,
@@ -78,6 +85,15 @@ export const OrderFulfilled = async (
         },
       });
       logger.info("Order updated:", orderHash);
+
+      const afterCount = await prisma.seaportOrder.count({
+        where: {
+          fulfilled: true,
+        },
+      });
+
+      console.log(beforeCount);
+      console.log(afterCount);
     } catch (error) {
       if (error.code === "P2025") {
         // Handle not found error

@@ -2,9 +2,9 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { Client } from "@opensearch-project/opensearch";
 import { ethers } from "ethers";
-import { EventParser, ListenerOptions } from "@/types";
-import { createEventParser } from "@/parser";
-import { createLogger } from "@/logger";
+import { EventParser, ListenerOptions } from "../types";
+import { createEventParser } from "../parser";
+import { createLogger } from "../logger";
 import { Seaport } from "@opensea/seaport-js";
 import { ABIs, BEACON_CONTRACT } from "../data";
 export class Listener {

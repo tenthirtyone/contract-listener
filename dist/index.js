@@ -24,7 +24,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const listener_1 = require("./listener");
-__exportStar(require("@/types"), exports);
+__exportStar(require("./types"), exports);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const listener = new listener_1.Listener();

@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenMint = void 0;
-const logger_1 = require("@/logger");
+const logger_1 = require("../../logger");
 const logger = (0, logger_1.createLogger)("TokenMint");
 const TokenMint = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
@@ -27,7 +27,7 @@ const TokenMint = (evt, eventListener, transaction, receipt) => __awaiter(void 0
         data: { to, tokenId, cid },
         transaction,
         receipt,
-        price
+        price,
     };
     logger.info(data);
     return data;

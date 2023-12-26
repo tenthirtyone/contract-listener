@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProxyDeployed = void 0;
-const logger_1 = require("@/logger");
+const logger_1 = require("../../logger");
 const logger = (0, logger_1.createLogger)("ProxyDeployed");
 const TYPE = "ERC1155";
 const ProxyDeployed = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
@@ -27,7 +27,7 @@ const ProxyDeployed = (evt, eventListener, transaction, receipt) => __awaiter(vo
         data: { address: proxyAddress },
         transaction,
         receipt,
-        price
+        price,
     };
     logger.info(data);
     return data;

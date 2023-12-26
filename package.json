@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "mocha -r ts-node/register 'tests/**/*.ts'",
     "dev": "nodemon -r tsconfig-paths/register src/index.ts",
-    "start": "npm install; npx prisma generate; ts-node -r tsconfig-paths/register src/index.ts"
+    "start": "npm install; npx prisma generate; npm run build; node -r tsconfig-paths/register dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@opensearch-project/opensearch": "^2.4.0",
-    "@prisma/client": "^4.13.0",
+    "@prisma/client": "^5.7.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "ethers": "5.7",

@@ -1,7 +1,7 @@
 // This data will become the model for a db once it's refined
-import { Contract } from "@/types";
+import { Contract } from "../types";
 import { abi } from "./BeaconABI";
-import { abi as TokenABI } from "./MultiTokenContract.json"
+import { abi as TokenABI } from "./MultiTokenContract.json";
 
 export const mockContracts: Contract[] = [
   {
@@ -20,4 +20,4 @@ export const BEACON_CONTRACT = {
   address: "0x471A4b7de2FE71F44db772122320baB88bFb853C",
   type: "Beacon",
   abi,
-}
+};

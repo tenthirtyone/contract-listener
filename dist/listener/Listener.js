@@ -12,14 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Listener = void 0;
 require("dotenv/config");
 const client_1 = require("@prisma/client");
+const opensearch_1 = require("@opensearch-project/opensearch");
 const ethers_1 = require("ethers");
-const data_1 = require("@/data");
-const http_1 = require("@/http");
-const utils_1 = require("@/utils");
-const parser_1 = require("@/parser");
-const poller_1 = require("@/poller");
-const logger_1 = require("@/logger");
-const data_2 = require("../data");
+const parser_1 = require("../parser");
+const logger_1 = require("../logger");
+const seaport_js_1 = require("@opensea/seaport-js");
+const data_1 = require("../data");
 class Listener {
     constructor(options) {
         this._options = Object.assign(Object.assign({}, Listener.DEFAULTS), options);
@@ -27,17 +25,27 @@ class Listener {
             throw new Error("No providerUrl provided.");
         }
         this._provider = new ethers_1.ethers.providers.JsonRpcProvider(this._options.providerUrl);
-        this._db = new client_1.PrismaClient();
+        this._prisma = new client_1.PrismaClient();
+        this._seaport = new seaport_js_1.Seaport(this._provider);
+        this._opensearch = new opensearch_1.Client({
+            node: this._options.opensearchNode,
+            auth: {
+                username: this._options.opensearchUser,
+                password: this._options.opensearchPass,
+            },
+        });
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            this._poller = (0, poller_1.createPoller)();
             this._parser = (0, parser_1.createEventParser)();
             this._logger = (0, logger_1.createLogger)("Event Listener");
-            this._webhooks = data_1.mockWebhooks;
-            const contracts = yield this._getContracts();
+            const contracts = []; //await this._getContracts();
+            contracts.push({
+                address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+                type: "seaport15",
+            });
             this._contracts = contracts.map((contract) => {
-                return new ethers_1.ethers.Contract(contract.address, data_2.ABIs[contract.type], this._provider);
+                return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);
             });
             this.listenForEvents();
             this._logger.info("Event Listener started");
@@ -56,9 +64,13 @@ class Listener {
             this._logger.info(`Event: ${event.event} for contract: ${contract.address}.`);
             try {
                 if (this._parser[event.event]) {
-                    const { transaction, receipt } = yield (0, utils_1.getTransactionData)(event.transactionHash);
-                    const data = yield this._parser[event.event](event, this, transaction, receipt);
-                    this._webhooks.forEach((hook) => (0, http_1.post)(hook.url, data));
+                    const transaction = null;
+                    const receipt = null;
+                    yield this._parser[event.event](event, this, transaction, receipt, {
+                        prisma: this._prisma,
+                        opensearch: this._opensearch,
+                        seaport: this._seaport,
+                    });
                 }
                 else {
                     this._logger.info(`Event: ${event.event} received, no matching parser.`);
@@ -72,9 +84,9 @@ class Listener {
     addContract(address, type) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const contract = new ethers_1.ethers.Contract(address, data_2.ABIs[type], this._provider);
+                const contract = new ethers_1.ethers.Contract(address, data_1.ABIs[type], this._provider);
                 this.createEventListener(contract);
-                yield this._saveContract(address, type);
+                //await this._saveContract(address, type);
                 this._contracts.push(contract);
             }
             catch (e) {
@@ -82,40 +94,38 @@ class Listener {
             }
         });
     }
-    _saveContract(address, type) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this._logger.info(`Saving ${type} at address: ${address}`);
-            try {
-                yield this._db.contract.create({
-                    data: {
-                        address,
-                        type
-                    },
-                });
-            }
-            catch (e) {
-                this._logger.error(e);
-            }
+    /*
+    async _saveContract(address, type) {
+      this._logger.info(`Saving ${type} at address: ${address}`);
+      try {
+        await this._prisma.contract.create({
+          data: {
+            address,
+            type,
+          },
         });
+      } catch (e) {
+        this._logger.error(e);
+      }
     }
-    _getContracts() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let contracts = [];
-            try {
-                contracts = yield this._db.contract.findMany();
-            }
-            catch (e) {
-                this._logger.error(e);
-            }
-            return contracts;
-        });
+  
+    async _getContracts() {
+      let contracts = [];
+      try {
+        contracts = await this._db.contract.findMany();
+      } catch (e) {
+        this._logger.error(e);
+      }
+  
+      return contracts;
     }
-    get price() {
-        return this._poller.getRecentPrice();
-    }
+  */
     static get DEFAULTS() {
         return {
             providerUrl: process.env.PROVIDER_URL || "",
+            opensearchUser: process.env.OPENSEARCH_USERNAME || "",
+            opensearchPass: process.env.OPENSEARCH_PASSWORD || "",
+            opensearchNode: process.env.OPENSEARCH_NODE || "",
         };
     }
 }

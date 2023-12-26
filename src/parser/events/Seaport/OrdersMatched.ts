@@ -1,4 +1,4 @@
-import { createLogger } from "@/logger";
+import { createLogger } from "../../../logger";
 import { Event, TransferSingleEvent } from "@/types";
 
 const logger = createLogger("Seaport-OrdersMatched");

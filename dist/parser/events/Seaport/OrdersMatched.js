@@ -9,29 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransferSingle = void 0;
-const logger_1 = require("../../logger");
-const logger = (0, logger_1.createLogger)("TransferSingle");
-const TransferSingle = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
+exports.OrdersMatched = void 0;
+const logger_1 = require("../../../logger");
+const logger = (0, logger_1.createLogger)("Seaport-OrdersMatched");
+const OrdersMatched = (evt, eventListener, transaction, receipt, prisma) => __awaiter(void 0, void 0, void 0, function* () {
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const operator = args[0];
-    const from = args[1];
-    const to = args[2];
-    const tokenId = args[3].toNumber();
-    const value = args[4].toNumber();
-    const price = eventListener.price;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: { operator, from, to, tokenId, value },
-        transaction,
-        receipt,
-        price,
-    };
-    logger.info(data.data);
-    return data;
+    return;
 });
-exports.TransferSingle = TransferSingle;
+exports.OrdersMatched = OrdersMatched;

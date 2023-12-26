@@ -1,6 +1,5 @@
 import { Listener } from "./listener";
-export * from "@/types";
-
+export * from "./types";
 
 async function main() {
   const listener = new Listener();
@@ -10,4 +9,4 @@ async function main() {
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-})
+});

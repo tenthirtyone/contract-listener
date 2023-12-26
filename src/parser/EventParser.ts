@@ -6,7 +6,7 @@ import {
   OrdersMatched,
   OrderCancelled,
 } from "./events";
-import { EventParser as TEventParser } from "@/types";
+import { EventParser as TEventParser } from "../types";
 
 export function createEventParser(): TEventParser {
   return {

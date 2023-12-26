@@ -1,13 +1,16 @@
-
-
-import { createLogger } from "@/logger";
-import { Event, ProxyDeployedEvent } from "@/types";
+import { createLogger } from "../../logger";
+import { Event, ProxyDeployedEvent } from "../../types";
 
 const logger = createLogger("ProxyDeployed");
 
 const TYPE = "ERC1155";
 
-export const ProxyDeployed = async (evt: Event, eventListener: any, transaction: any, receipt: any): Promise<ProxyDeployedEvent> => {
+export const ProxyDeployed = async (
+  evt: Event,
+  eventListener: any,
+  transaction: any,
+  receipt: any
+): Promise<ProxyDeployedEvent> => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
   const proxyAddress = args[0];
 
@@ -24,7 +27,7 @@ export const ProxyDeployed = async (evt: Event, eventListener: any, transaction:
     data: { address: proxyAddress },
     transaction,
     receipt,
-    price
+    price,
   };
 
   logger.info(data);
