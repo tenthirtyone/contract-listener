@@ -42,6 +42,7 @@ model Collection {
   lazymint            Boolean?        @default(false)
   nsfw                Boolean?        @default(false)
   social_links        Json?
+  license             Json?
   nonce               String
 
   created_at DateTime @default(now())
