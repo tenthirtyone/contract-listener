@@ -33,8 +33,10 @@ export const ProxyDeployed = async (
 
   await prisma.collection.upsert({
     where: {
-      address: proxyAddress,
-      chain: options.chain,
+      address_chain: {
+        address: proxyAddress,
+        chain: options.chain,
+      },
     },
     update: {
       transaction_hash: transactionHash,
