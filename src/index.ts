@@ -2,8 +2,33 @@ import { Listener } from "./listener";
 export * from "./types";
 
 async function main() {
-  const listener = new Listener();
-  await listener.start();
+  const ethereum = new Listener({
+    providerUrl: process.env.ETHEREUM_URL,
+    name: "EthereumListener",
+    chain: 1,
+  });
+  await ethereum.start();
+
+  const sepolia = new Listener({
+    providerUrl: process.env.SEPOLIA_URL,
+    name: "SepoliaListener",
+    chain: 11155111,
+  });
+  await sepolia.start();
+
+  const polygon = new Listener({
+    providerUrl: process.env.POLYGON_URL,
+    name: "PolygonListener",
+    chain: 137,
+  });
+  await polygon.start();
+
+  const mumbai = new Listener({
+    providerUrl: process.env.MUMBAI_URL,
+    name: "MumbaiListener",
+    chain: 80001,
+  });
+  await mumbai.start();
 }
 
 main().catch((error) => {

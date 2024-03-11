@@ -1,11 +1,9 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { Client } from "@opensearch-project/opensearch";
 import { ethers } from "ethers";
 import { EventParser, ListenerOptions } from "../types";
 import { createEventParser } from "../parser";
 import { createLogger } from "../logger";
-import { Seaport } from "@opensea/seaport-js";
 import { ABIs, BEACON_CONTRACT } from "../data";
 export class Listener {
   private _prisma: PrismaClient;
@@ -28,25 +26,23 @@ export class Listener {
       this._options.providerUrl
     );
     this._prisma = new PrismaClient();
-    this._seaport = new Seaport(this._provider);
-    this._opensearch = new Client({
-      node: this._options.opensearchNode,
-      auth: {
-        username: this._options.opensearchUser,
-        password: this._options.opensearchPass,
-      },
-    });
   }
 
   async start() {
     this._parser = createEventParser();
-    this._logger = createLogger("Event Listener");
+    this._logger = createLogger(this._options.name);
 
     const contracts = []; //await this._getContracts();
+    contracts.push({
+      address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
+      type: "Beacon",
+    });
+    /*
     contracts.push({
       address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
       type: "seaport15",
     });
+    */
     this._contracts = contracts.map((contract) => {
       return new ethers.Contract(
         contract.address,
@@ -77,8 +73,8 @@ export class Listener {
 
           await this._parser[event.event](event, this, transaction, receipt, {
             prisma: this._prisma,
-            opensearch: this._opensearch,
-            seaport: this._seaport,
+            logger: this._logger,
+            options: this._options,
           });
         } else {
           this._logger.info(
@@ -129,7 +125,9 @@ export class Listener {
 */
   static get DEFAULTS(): ListenerOptions {
     return {
-      providerUrl: process.env.PROVIDER_URL || "",
+      name: "Event Listener",
+      chain: 1,
+      providerUrl: process.env.ETHEREUM_URL || "",
       opensearchUser: process.env.OPENSEARCH_USERNAME || "",
       opensearchPass: process.env.OPENSEARCH_PASSWORD || "",
       opensearchNode: process.env.OPENSEARCH_NODE || "",

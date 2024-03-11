@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CollectionState {
+  PENDING
+  FAILED
+  MINED
+}
+
+model Collection {
+  address             String          @id
+  name                String?
+  symbol              String?
+  description         String?
+  logo                String?
+  image               String?
+  banner              String?
+  contract_type       String?
+  chain               Int
+  network             String?
+  royalty_base_points Int?
+  royalty_denominator Int             @default(10000)
+  royalty_address     String?
+  total_supply        Int             @default(0)
+  transaction_hash    String?
+  transaction_state   CollectionState @default(PENDING)
+  creator             String?
+  is_dcentral         Boolean         @default(true)
+  is_official         Boolean         @default(false)
+  lazymint            Boolean?        @default(false)
+  nsfw                Boolean?        @default(false)
+  social_links        Json?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+}

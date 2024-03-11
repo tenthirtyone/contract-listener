@@ -16,11 +16,13 @@ export type EventParser = {
 
 type EnvironmentContext = {
   prisma: any;
-  opensearch: any;
-  seaport: any;
+  logger: any;
+  options: ListenerOptions;
 };
 
 export type ListenerOptions = {
+  name: string;
+  chain: number;
   providerUrl: string;
   opensearchUser: string;
   opensearchPass: string;
