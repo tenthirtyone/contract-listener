@@ -31,20 +31,14 @@ export const ProxyDeployed = async (
 
   logger.info(`Update ${proxyAddress} for chain ${options.chain} mined.`);
 
-  await prisma.collection.upsert({
+  await prisma.collection.update({
     where: {
       address_chain: {
         address: proxyAddress,
         chain: options.chain,
       },
     },
-    update: {
-      transaction_hash: transactionHash,
-      transaction_state: "MINED",
-    },
-    create: {
-      address: proxyAddress,
-      chain: options.chain,
+    data: {
       transaction_hash: transactionHash,
       transaction_state: "MINED",
     },
