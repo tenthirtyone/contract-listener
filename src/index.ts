@@ -1,5 +1,7 @@
 import { Listener } from "./listener";
 export * from "./types";
+import express from "express";
+import { createLogger } from "./logger";
 
 async function main() {
   const ethereum = new Listener({
@@ -35,3 +37,12 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+const logger = createLogger("contract-listener");
+
+const app = express();
+const port = process.env.PORT || 8080;
+
+app.get("/", (req, res) => res.send(true));
+
+app.listen(port, () => logger.info(`Server is running on port ${port}`));

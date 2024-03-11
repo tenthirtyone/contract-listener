@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@opensea/seaport-js": "2.0.8",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.4",
@@ -20,7 +21,6 @@
     "expect": "^29.6.2",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
-    "@opensea/seaport-js": "2.0.8",
     "typescript": "^5.1.6"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "ethers": "5.7",
+    "express": "^4.18.3",
     "pino": "^8.14.1",
     "pino-pretty": "^10.1.0",
     "ts-node": "^10.9.1",
