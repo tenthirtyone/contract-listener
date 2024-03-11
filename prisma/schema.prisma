@@ -20,7 +20,7 @@ enum CollectionState {
 }
 
 model Collection {
-  address             String          @id
+  address             String
   name                String?
   symbol              String?
   description         String?
@@ -45,4 +45,6 @@ model Collection {
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
+
+  @@id([address, chain])
 }
