@@ -37,6 +37,7 @@ model Collection {
   transaction_hash    String?
   transaction_state   CollectionState @default(PENDING)
   creator             String?
+  owner               String?
   is_dcentral         Boolean         @default(true)
   is_official         Boolean         @default(false)
   lazymint            Boolean?        @default(false)
