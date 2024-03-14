@@ -108,8 +108,8 @@ model NftOwners {
   user_address  String
   balance       Int
 
-  User User @relation(fields: [user_address], references: [address])
-  Nft  Nft  @relation(fields: [chain, token_address, identifier], references: [chain, address, identifier])
+  User User? @relation(fields: [user_address], references: [address])
+  Nft  Nft   @relation(fields: [chain, token_address, identifier], references: [chain, address, identifier])
 
   @@id([chain, token_address, identifier, user_address])
 }

@@ -35,7 +35,6 @@ export const TransferSingle = async (
   };
 
   if (from === ZERO_ADDRESS) {
-    console.log("Token is minted");
     let sparseNft = await getSparseNft({
       chain: options.chain,
       address,
@@ -53,10 +52,35 @@ export const TransferSingle = async (
       chain: options.chain,
       transaction_hash: transactionHash,
     });
-    // Create the new NFT record
-    // update the ownership balance
+
+    await incrementCollectionSupply({
+      chain: options.chain,
+      address,
+    });
+
+    await updateOrCreateBalance({
+      chain: options.chain,
+      token_address: address,
+      identifier: tokenId.toString(),
+      user_address: to,
+      incrementBy: value,
+    });
   } else {
     // update the ownership balance
+    await updateOrCreateBalance({
+      chain: options.chain,
+      token_address: address,
+      identifier: tokenId.toString(),
+      user_address: to,
+      incrementBy: value,
+    });
+    await updateOrCreateBalance({
+      chain: options.chain,
+      token_address: address,
+      identifier: tokenId.toString(),
+      user_address: from,
+      incrementBy: -value,
+    });
   }
 
   logger.info(data.data);
@@ -92,19 +116,6 @@ export const TransferSingle = async (
     attributes,
     creator,
   }) {
-    console.log({
-      chain,
-      address,
-      identifier,
-      supply,
-      name,
-      image,
-      transaction_hash,
-      description,
-      media,
-      attributes,
-      creator,
-    });
     return await prisma.nft.create({
       data: {
         identifier,
@@ -126,5 +137,73 @@ export const TransferSingle = async (
         },
       },
     });
+  }
+
+  async function incrementCollectionSupply({ chain, address }) {
+    return await prisma.collection.update({
+      where: {
+        address_chain: {
+          address,
+          chain,
+        },
+      },
+      data: {
+        total_supply: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  async function updateOrCreateBalance({
+    chain,
+    token_address,
+    identifier,
+    user_address,
+    incrementBy,
+  }) {
+    // Try to find an existing balance record
+    const existingBalance = await prisma.nftOwners.findUnique({
+      where: {
+        chain_token_address_identifier_user_address: {
+          chain,
+          token_address,
+          identifier,
+          user_address,
+        },
+      },
+    });
+
+    if (existingBalance) {
+      // If found, increment the balance
+      return await prisma.nftOwners.update({
+        where: {
+          chain_token_address_identifier_user_address: {
+            chain,
+            token_address,
+            identifier,
+            user_address,
+          },
+        },
+        data: {
+          balance: {
+            increment: incrementBy,
+          },
+        },
+      });
+    } else {
+      // If not found, create a new balance record
+      return await prisma.nftOwners.create({
+        data: {
+          chain,
+          token_address,
+          identifier,
+          user_address,
+          balance: incrementBy,
+          // Assuming the Nft relation can be directly connected or needs to be created
+          // Similarly for User, if it's a known user, connect using user_address
+        },
+      });
+    }
   }
 };
