@@ -22,16 +22,48 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const listener_1 = require("./listener");
 __exportStar(require("./types"), exports);
+const express_1 = __importDefault(require("express"));
+const logger_1 = require("./logger");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const listener = new listener_1.Listener();
-        yield listener.start();
+        const ethereum = new listener_1.Listener({
+            providerUrl: process.env.ETHEREUM_URL,
+            name: "EthereumListener",
+            chain: 1,
+        });
+        yield ethereum.start();
+        const sepolia = new listener_1.Listener({
+            providerUrl: process.env.SEPOLIA_URL,
+            name: "SepoliaListener",
+            chain: 11155111,
+        });
+        yield sepolia.start();
+        const polygon = new listener_1.Listener({
+            providerUrl: process.env.POLYGON_URL,
+            name: "PolygonListener",
+            chain: 137,
+        });
+        yield polygon.start();
+        const mumbai = new listener_1.Listener({
+            providerUrl: process.env.MUMBAI_URL,
+            name: "MumbaiListener",
+            chain: 80001,
+        });
+        yield mumbai.start();
     });
 }
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
+const logger = (0, logger_1.createLogger)("contract-listener");
+const app = (0, express_1.default)();
+const port = process.env.PORT || 8080;
+app.get("/", (req, res) => res.send(true));
+app.listen(port, () => logger.info(`Server is running on port ${port}`));

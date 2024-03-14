@@ -1,8 +1,8 @@
 import { createLogger } from "../../logger";
 import { getTransactionData } from "@/utils";
 import { Event, TransferSingleEvent } from "@/types";
-import { ZERO_ADDRESS } from "@/constants";
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const logger = createLogger("TransferSingle");
 
 export const TransferSingle = async (

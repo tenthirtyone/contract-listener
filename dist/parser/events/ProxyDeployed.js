@@ -10,10 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProxyDeployed = void 0;
-const logger_1 = require("../../logger");
-const logger = (0, logger_1.createLogger)("ProxyDeployed");
 const TYPE = "ERC1155";
-const ProxyDeployed = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
+const ProxyDeployed = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { prisma, logger, options } = context;
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
     const proxyAddress = args[0];
     yield eventListener.addContract(proxyAddress, TYPE);
@@ -29,7 +28,19 @@ const ProxyDeployed = (evt, eventListener, transaction, receipt) => __awaiter(vo
         receipt,
         price,
     };
-    logger.info(data);
+    logger.info(`Update ${proxyAddress} for chain ${options.chain} mined.`);
+    yield prisma.collection.update({
+        where: {
+            address_chain: {
+                address: proxyAddress,
+                chain: options.chain,
+            },
+        },
+        data: {
+            transaction_hash: transactionHash,
+            transaction_state: "MINED",
+        },
+    });
     return data;
 });
 exports.ProxyDeployed = ProxyDeployed;

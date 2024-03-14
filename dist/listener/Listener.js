@@ -12,11 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Listener = void 0;
 require("dotenv/config");
 const client_1 = require("@prisma/client");
-const opensearch_1 = require("@opensearch-project/opensearch");
 const ethers_1 = require("ethers");
 const parser_1 = require("../parser");
 const logger_1 = require("../logger");
-const seaport_js_1 = require("@opensea/seaport-js");
 const data_1 = require("../data");
 class Listener {
     constructor(options) {
@@ -26,24 +24,22 @@ class Listener {
         }
         this._provider = new ethers_1.ethers.providers.JsonRpcProvider(this._options.providerUrl);
         this._prisma = new client_1.PrismaClient();
-        this._seaport = new seaport_js_1.Seaport(this._provider);
-        this._opensearch = new opensearch_1.Client({
-            node: this._options.opensearchNode,
-            auth: {
-                username: this._options.opensearchUser,
-                password: this._options.opensearchPass,
-            },
-        });
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
             this._parser = (0, parser_1.createEventParser)();
-            this._logger = (0, logger_1.createLogger)("Event Listener");
-            const contracts = []; //await this._getContracts();
+            this._logger = (0, logger_1.createLogger)(this._options.name);
+            const contracts = yield this._getContracts();
             contracts.push({
-                address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
-                type: "seaport15",
+                address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
+                type: "Beacon",
             });
+            /*
+            contracts.push({
+              address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+              type: "seaport15",
+            });
+            */
             this._contracts = contracts.map((contract) => {
                 return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);
             });
@@ -68,8 +64,8 @@ class Listener {
                     const receipt = null;
                     yield this._parser[event.event](event, this, transaction, receipt, {
                         prisma: this._prisma,
-                        opensearch: this._opensearch,
-                        seaport: this._seaport,
+                        logger: this._logger,
+                        options: this._options,
                     });
                 }
                 else {
@@ -108,21 +104,29 @@ class Listener {
         this._logger.error(e);
       }
     }
-  
-    async _getContracts() {
-      let contracts = [];
-      try {
-        contracts = await this._db.contract.findMany();
-      } catch (e) {
-        this._logger.error(e);
-      }
-  
-      return contracts;
-    }
   */
+    _getContracts() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let contracts = [];
+            try {
+                contracts = yield this._prisma.collection.findMany({
+                    where: {
+                        chain: this._options.chain,
+                    },
+                });
+                return contracts;
+            }
+            catch (e) {
+                this._logger.error(e);
+            }
+            return contracts;
+        });
+    }
     static get DEFAULTS() {
         return {
-            providerUrl: process.env.PROVIDER_URL || "",
+            name: "Event Listener",
+            chain: 1,
+            providerUrl: process.env.ETHEREUM_URL || "",
             opensearchUser: process.env.OPENSEARCH_USERNAME || "",
             opensearchPass: process.env.OPENSEARCH_PASSWORD || "",
             opensearchNode: process.env.OPENSEARCH_NODE || "",

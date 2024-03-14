@@ -11,8 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransferSingle = void 0;
 const logger_1 = require("../../logger");
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const logger = (0, logger_1.createLogger)("TransferSingle");
-const TransferSingle = (evt, eventListener, transaction, receipt) => __awaiter(void 0, void 0, void 0, function* () {
+const TransferSingle = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { prisma, logger, options } = context;
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
     const operator = args[0];
     const from = args[1];
@@ -31,7 +33,148 @@ const TransferSingle = (evt, eventListener, transaction, receipt) => __awaiter(v
         receipt,
         price,
     };
+    if (from === ZERO_ADDRESS) {
+        let sparseNft = yield getSparseNft({
+            chain: options.chain,
+            address,
+            identifier: tokenId.toString(),
+            transaction_hash: transactionHash,
+        });
+        delete sparseNft.id;
+        delete sparseNft.createdAt;
+        delete sparseNft.updatedAt;
+        yield createNft(Object.assign(Object.assign({}, sparseNft), { identifier: tokenId.toString(), chain: options.chain, transaction_hash: transactionHash }));
+        yield incrementCollectionSupply({
+            chain: options.chain,
+            address,
+        });
+        yield updateOrCreateBalance({
+            chain: options.chain,
+            token_address: address,
+            identifier: tokenId.toString(),
+            user_address: to,
+            incrementBy: value,
+        });
+    }
+    else {
+        // update the ownership balance
+        yield updateOrCreateBalance({
+            chain: options.chain,
+            token_address: address,
+            identifier: tokenId.toString(),
+            user_address: to,
+            incrementBy: value,
+        });
+        yield updateOrCreateBalance({
+            chain: options.chain,
+            token_address: address,
+            identifier: tokenId.toString(),
+            user_address: from,
+            incrementBy: -value,
+        });
+    }
     logger.info(data.data);
+    logger.info(data);
     return data;
+    function getSparseNft({ chain, address, identifier, transaction_hash, }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield prisma.sparseNft.findFirst({
+                where: {
+                    chain,
+                    address,
+                    OR: [{ identifier }, { transaction_hash }],
+                },
+            });
+        });
+    }
+    function createNft({ chain, address, identifier, supply, name, image, transaction_hash, description, media, attributes, creator, }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield prisma.nft.create({
+                data: {
+                    identifier,
+                    supply,
+                    name,
+                    image,
+                    transaction_hash,
+                    description,
+                    media,
+                    attributes,
+                    creator,
+                    collection: {
+                        connect: {
+                            address_chain: {
+                                address,
+                                chain,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+    }
+    function incrementCollectionSupply({ chain, address }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield prisma.collection.update({
+                where: {
+                    address_chain: {
+                        address,
+                        chain,
+                    },
+                },
+                data: {
+                    total_supply: {
+                        increment: 1,
+                    },
+                },
+            });
+        });
+    }
+    function updateOrCreateBalance({ chain, token_address, identifier, user_address, incrementBy, }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Try to find an existing balance record
+            const existingBalance = yield prisma.nftOwners.findUnique({
+                where: {
+                    chain_token_address_identifier_user_address: {
+                        chain,
+                        token_address,
+                        identifier,
+                        user_address,
+                    },
+                },
+            });
+            if (existingBalance) {
+                // If found, increment the balance
+                return yield prisma.nftOwners.update({
+                    where: {
+                        chain_token_address_identifier_user_address: {
+                            chain,
+                            token_address,
+                            identifier,
+                            user_address,
+                        },
+                    },
+                    data: {
+                        balance: {
+                            increment: incrementBy,
+                        },
+                    },
+                });
+            }
+            else {
+                // If not found, create a new balance record
+                return yield prisma.nftOwners.create({
+                    data: {
+                        chain,
+                        token_address,
+                        identifier,
+                        user_address,
+                        balance: incrementBy,
+                        // Assuming the Nft relation can be directly connected or needs to be created
+                        // Similarly for User, if it's a known user, connect using user_address
+                    },
+                });
+            }
+        });
+    }
 });
 exports.TransferSingle = TransferSingle;
