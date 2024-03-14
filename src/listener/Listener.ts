@@ -32,7 +32,7 @@ export class Listener {
     this._parser = createEventParser();
     this._logger = createLogger(this._options.name);
 
-    const contracts = []; //await this._getContracts();
+    const contracts = await this._getContracts();
     contracts.push({
       address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
       type: "Beacon",
@@ -111,18 +111,23 @@ export class Listener {
       this._logger.error(e);
     }
   }
-
+*/
   async _getContracts() {
     let contracts = [];
     try {
-      contracts = await this._db.contract.findMany();
+      contracts = await this._prisma.collection.findMany({
+        where: {
+          chain: this._options.chain,
+        },
+      });
+      return contracts;
     } catch (e) {
       this._logger.error(e);
     }
 
     return contracts;
   }
-*/
+
   static get DEFAULTS(): ListenerOptions {
     return {
       name: "Event Listener",

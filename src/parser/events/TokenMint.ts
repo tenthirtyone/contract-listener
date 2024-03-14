@@ -10,6 +10,7 @@ export const TokenMint = async (
   receipt: any
 ): Promise<TokenMintEvent> => {
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
+
   const to = args[0];
   const tokenId = args[1].toNumber();
   const cid = args[2];

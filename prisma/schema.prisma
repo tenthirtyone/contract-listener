@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,6 +8,34 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  address       String      @id
+  email         String?     @unique
+  username      String?     @unique
+  password      String?
+  first_name    String?
+  last_name     String?
+  phone_number  String?
+  social        Json?
+  bio           String?
+  profile_image String?
+  banner_image  String?
+  verified      Boolean     @default(false)
+  nfts          NftOwners[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Nonce {
+  nonce     String   @id
+  message   String
+  address   String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum CollectionState {
@@ -27,7 +52,7 @@ model Collection {
   logo                String?
   image               String?
   banner              String?
-  contract_type       String?
+  type                String?
   chain               Int
   network             String?
   royalty_base_points Int?
@@ -45,9 +70,63 @@ model Collection {
   social_links        Json?
   license             Json?
   nonce               String
+  nfts                Nft[]
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
   @@id([address, chain])
+}
+
+model Nft {
+  chain            Int
+  address          String
+  identifier       String
+  supply           Int
+  name             String?
+  image            String?
+  transaction_hash String?
+  description      String?
+  media            Json?
+  attributes       Json?
+  creator          String
+
+  collection Collection  @relation(fields: [address, chain], references: [address, chain])
+  owners     NftOwners[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@id([chain, address, identifier])
+}
+
+// Sparse Ownership table
+model NftOwners {
+  chain         Int
+  token_address String
+  identifier    String
+  user_address  String
+  balance       Int
+
+  User User @relation(fields: [user_address], references: [address])
+  Nft  Nft  @relation(fields: [chain, token_address, identifier], references: [chain, address, identifier])
+
+  @@id([chain, token_address, identifier, user_address])
+}
+
+// We support two forms of minting, direct mint where the transaction hash is known before the id, and lazy mint where the id is known before the transaction hash.
+// And, Lazy Mint can have multiple vouchers for the same id. So... upsert and guarantee only the latest data will be used, however old prices on valid vouchers may still work. 
+model SparseNft {
+  id               Int     @id @default(autoincrement())
+  chain            Int?
+  address          String?
+  identifier       String?
+  name             String?
+  image            String?
+  transaction_hash String?
+  supply           Int?
+  description      String?
+  media            Json?
+  attributes       Json?
+  creator          String?
 }
