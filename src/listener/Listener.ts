@@ -37,6 +37,10 @@ export class Listener {
       address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
       type: "Beacon",
     });
+    contracts.push({
+      address: "0xf1D554368E0a1b4d15c996583bBf4703477091f0",
+      type: "Beacon",
+    });
     /*
     contracts.push({
       address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
