@@ -83,9 +83,6 @@ export const TransferSingle = async (
     });
   }
 
-  logger.info(data.data);
-  logger.info(data);
-
   return data;
 
   async function getSparseNft({
