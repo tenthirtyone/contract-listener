@@ -35,52 +35,65 @@ export const TransferSingle = async (
   };
 
   if (from === ZERO_ADDRESS) {
-    let sparseNft = await getSparseNft({
-      chain: options.chain,
-      address,
-      identifier: tokenId.toString(),
-      transaction_hash: transactionHash,
-    });
+    try {
+      let sparseNft = await getSparseNft({
+        chain: options.chain,
+        address,
+        identifier: tokenId.toString(),
+        transaction_hash: transactionHash,
+      });
 
-    delete sparseNft.id;
-    delete sparseNft.createdAt;
-    delete sparseNft.updatedAt;
+      // If this is a lazy mint token, the data will already exist
+      if (sparseNft) {
+        delete sparseNft.id;
+        delete sparseNft.createdAt;
+        delete sparseNft.updatedAt;
 
-    await createNft({
-      ...sparseNft,
-      identifier: tokenId.toString(),
-      chain: options.chain,
-      transaction_hash: transactionHash,
-    });
+        await createNft({
+          ...sparseNft,
+          identifier: tokenId.toString(),
+          chain: options.chain,
+          transaction_hash: transactionHash,
+        });
 
-    await incrementCollectionSupply({
-      chain: options.chain,
-      address,
-    });
+        await incrementCollectionSupply({
+          chain: options.chain,
+          address,
+        });
+      }
 
-    await updateOrCreateBalance({
-      chain: options.chain,
-      token_address: address,
-      identifier: tokenId.toString(),
-      user_address: to,
-      incrementBy: value,
-    });
+      await updateOrCreateBalance({
+        chain: options.chain,
+        token_address: address,
+        identifier: tokenId.toString(),
+        user_address: to,
+        incrementBy: value,
+      });
+    } catch (e) {
+      logger.error(e);
+      throw e;
+    }
   } else {
-    // update the ownership balance
-    await updateOrCreateBalance({
-      chain: options.chain,
-      token_address: address,
-      identifier: tokenId.toString(),
-      user_address: to,
-      incrementBy: value,
-    });
-    await updateOrCreateBalance({
-      chain: options.chain,
-      token_address: address,
-      identifier: tokenId.toString(),
-      user_address: from,
-      incrementBy: -value,
-    });
+    try {
+      // update the ownership balance
+      await updateOrCreateBalance({
+        chain: options.chain,
+        token_address: address,
+        identifier: tokenId.toString(),
+        user_address: to,
+        incrementBy: value,
+      });
+      await updateOrCreateBalance({
+        chain: options.chain,
+        token_address: address,
+        identifier: tokenId.toString(),
+        user_address: from,
+        incrementBy: -value,
+      });
+    } catch (e) {
+      logger.error(e);
+      throw e;
+    }
   }
 
   return data;
