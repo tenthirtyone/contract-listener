@@ -210,8 +210,6 @@ export const TransferSingle = async (
           identifier,
           user_address,
           balance: incrementBy,
-          // Assuming the Nft relation can be directly connected or needs to be created
-          // Similarly for User, if it's a known user, connect using user_address
         },
       });
     }

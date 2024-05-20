@@ -38,24 +38,35 @@ function main() {
             chain: 1,
         });
         yield ethereum.start();
-        const sepolia = new listener_1.Listener({
-            providerUrl: process.env.SEPOLIA_URL,
-            name: "SepoliaListener",
-            chain: 11155111,
+        /*
+        const sepolia = new Listener({
+          providerUrl: process.env.SEPOLIA_URL,
+          name: "SepoliaListener",
+          chain: 11155111,
         });
-        yield sepolia.start();
-        const polygon = new listener_1.Listener({
-            providerUrl: process.env.POLYGON_URL,
-            name: "PolygonListener",
-            chain: 137,
+        await sepolia.start();
+      
+        const polygon = new Listener({
+          providerUrl: process.env.POLYGON_URL,
+          name: "PolygonListener",
+          chain: 137,
         });
-        yield polygon.start();
-        const mumbai = new listener_1.Listener({
-            providerUrl: process.env.MUMBAI_URL,
-            name: "MumbaiListener",
-            chain: 80001,
+        await polygon.start();
+      
+        const amoy = new Listener({
+          providerUrl: process.env.AMOY_URL,
+          name: "AmoyListener",
+          chain: 80002,
         });
-        yield mumbai.start();
+        await amoy.start();
+      
+        const base = new Listener({
+          providerUrl: process.env.AMOY_URL,
+          name: "BaseListener",
+          chain: 8453,
+        });
+        await base.start();
+        */
     });
 }
 main().catch((error) => {

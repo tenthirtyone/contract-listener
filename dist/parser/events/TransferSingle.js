@@ -34,47 +34,60 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
         price,
     };
     if (from === ZERO_ADDRESS) {
-        let sparseNft = yield getSparseNft({
-            chain: options.chain,
-            address,
-            identifier: tokenId.toString(),
-            transaction_hash: transactionHash,
-        });
-        delete sparseNft.id;
-        delete sparseNft.createdAt;
-        delete sparseNft.updatedAt;
-        yield createNft(Object.assign(Object.assign({}, sparseNft), { identifier: tokenId.toString(), chain: options.chain, transaction_hash: transactionHash }));
-        yield incrementCollectionSupply({
-            chain: options.chain,
-            address,
-        });
-        yield updateOrCreateBalance({
-            chain: options.chain,
-            token_address: address,
-            identifier: tokenId.toString(),
-            user_address: to,
-            incrementBy: value,
-        });
+        try {
+            let sparseNft = yield getSparseNft({
+                chain: options.chain,
+                address,
+                identifier: tokenId.toString(),
+                transaction_hash: transactionHash,
+            });
+            // If this is a lazy mint token, the data will already exist
+            if (sparseNft) {
+                delete sparseNft.id;
+                delete sparseNft.createdAt;
+                delete sparseNft.updatedAt;
+                yield createNft(Object.assign(Object.assign({}, sparseNft), { identifier: tokenId.toString(), chain: options.chain, transaction_hash: transactionHash }));
+                yield incrementCollectionSupply({
+                    chain: options.chain,
+                    address,
+                });
+            }
+            yield updateOrCreateBalance({
+                chain: options.chain,
+                token_address: address,
+                identifier: tokenId.toString(),
+                user_address: to,
+                incrementBy: value,
+            });
+        }
+        catch (e) {
+            logger.error(e);
+            throw e;
+        }
     }
     else {
-        // update the ownership balance
-        yield updateOrCreateBalance({
-            chain: options.chain,
-            token_address: address,
-            identifier: tokenId.toString(),
-            user_address: to,
-            incrementBy: value,
-        });
-        yield updateOrCreateBalance({
-            chain: options.chain,
-            token_address: address,
-            identifier: tokenId.toString(),
-            user_address: from,
-            incrementBy: -value,
-        });
+        try {
+            // update the ownership balance
+            yield updateOrCreateBalance({
+                chain: options.chain,
+                token_address: address,
+                identifier: tokenId.toString(),
+                user_address: to,
+                incrementBy: value,
+            });
+            yield updateOrCreateBalance({
+                chain: options.chain,
+                token_address: address,
+                identifier: tokenId.toString(),
+                user_address: from,
+                incrementBy: -value,
+            });
+        }
+        catch (e) {
+            logger.error(e);
+            throw e;
+        }
     }
-    logger.info(data.data);
-    logger.info(data);
     return data;
     function getSparseNft({ chain, address, identifier, transaction_hash, }) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -169,8 +182,6 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
                         identifier,
                         user_address,
                         balance: incrementBy,
-                        // Assuming the Nft relation can be directly connected or needs to be created
-                        // Similarly for User, if it's a known user, connect using user_address
                     },
                 });
             }

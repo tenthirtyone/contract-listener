@@ -30,10 +30,7 @@ class Listener {
             this._parser = (0, parser_1.createEventParser)();
             this._logger = (0, logger_1.createLogger)(this._options.name);
             const contracts = yield this._getContracts();
-            contracts.push({
-                address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
-                type: "Beacon",
-            });
+            console.log(Array.isArray(contracts));
             /*
             contracts.push({
               address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
@@ -41,6 +38,8 @@ class Listener {
             });
             */
             this._contracts = contracts.map((contract) => {
+                console.log(contract.address);
+                console.log(contract.type);
                 return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);
             });
             this.listenForEvents();

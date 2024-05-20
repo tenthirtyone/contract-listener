@@ -8,5 +8,6 @@ import SeaportABI from "./seaportAbi.json";
 export const ABIs = {
   Beacon: abi,
   ERC1155: TokenABI,
+  ERC721: TokenABI,
   seaport15: SeaportABI,
 };

@@ -130,3 +130,18 @@ model SparseNft {
   attributes       Json?
   creator          String?
 }
+
+// Since vouchers are offchain, technically, the user may create an unlimited number of bespoke vouchers per NFT. On the front end, we will prevent it
+// But they don't, technically, need Dcentral to do this. We want to track everything they create but we will not allow the FE to create new vouchers, for now.
+model LazymintVoucher {
+  id           Int     @id @default(autoincrement())
+  chain        Int
+  address      String
+  identifier   String
+  creator      String
+  voucher_data Json
+  valid        Boolean @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+}

@@ -34,11 +34,11 @@ export class Listener {
 
     const contracts = await this._getContracts();
     contracts.push({
-      address: "0x9FBf72cF4825642ce904F00d3B52D643aC202045",
+      address: "0xb04a755a13d22Eda328460EA67622e630b680320",
       type: "Beacon",
     });
     contracts.push({
-      address: "0xf1D554368E0a1b4d15c996583bBf4703477091f0",
+      address: "0x7E8c00b86ae5383FaBB71f945E6c0373d01F2257",
       type: "Beacon",
     });
     /*

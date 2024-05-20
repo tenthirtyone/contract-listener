@@ -25,12 +25,33 @@ async function main() {
   });
   await polygon.start();
 
-  const mumbai = new Listener({
-    providerUrl: process.env.MUMBAI_URL,
-    name: "MumbaiListener",
-    chain: 80001,
+  const amoy = new Listener({
+    providerUrl: process.env.AMOY_URL,
+    name: "AmoyListener",
+    chain: 80002,
   });
-  await mumbai.start();
+  await amoy.start();
+
+  const base = new Listener({
+    providerUrl: process.env.AMOY_URL,
+    name: "BaseListener",
+    chain: 8453,
+  });
+  await base.start();
+
+  const optimism = new Listener({
+    providerUrl: process.env.BASE_URL,
+    name: "OptimismListener",
+    chain: 8453,
+  });
+  await optimism.start();
+
+  const arbitrum = new Listener({
+    providerUrl: process.env.ARBITRUM_URL,
+    name: "ArbitrumListener",
+    chain: 8453,
+  });
+  await arbitrum.start();
 }
 
 main().catch((error) => {
