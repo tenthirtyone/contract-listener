@@ -33,14 +33,14 @@ async function main() {
   await amoy.start();
 
   const base = new Listener({
-    providerUrl: process.env.AMOY_URL,
+    providerUrl: process.env.BASE_URL,
     name: "BaseListener",
     chain: 8453,
   });
   await base.start();
 
   const optimism = new Listener({
-    providerUrl: process.env.BASE_URL,
+    providerUrl: process.env.OPTIMISM_URL,
     name: "OptimismListener",
     chain: 8453,
   });
