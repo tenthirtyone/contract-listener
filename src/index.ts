@@ -42,14 +42,14 @@ async function main() {
   const optimism = new Listener({
     providerUrl: process.env.OPTIMISM_URL,
     name: "OptimismListener",
-    chain: 8453,
+    chain: 10,
   });
   await optimism.start();
 
   const arbitrum = new Listener({
     providerUrl: process.env.ARBITRUM_URL,
     name: "ArbitrumListener",
-    chain: 8453,
+    chain: 42161,
   });
   await arbitrum.start();
 }

@@ -38,15 +38,18 @@ export class Listener {
       type: "Beacon",
     });
     contracts.push({
-      address: "0x7E8c00b86ae5383FaBB71f945E6c0373d01F2257",
+      address: "0xD723f5B785b7922D60E4835fffd67f51aEC4f2cC",
       type: "Beacon",
     });
-    /*
     contracts.push({
-      address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
-      type: "seaport15",
+      address: "0xD49A798EA53e9Ad4A3D37879e44061D5aB11dF06",
+      type: "Beacon",
     });
-    */
+    contracts.push({
+      address: "0xA3ce97aef057cbd00FDc1cA9BED8b6c5A457AA2B",
+      type: "Beacon",
+    });
+
     this._contracts = contracts.map((contract) => {
       return new ethers.Contract(
         contract.address,
