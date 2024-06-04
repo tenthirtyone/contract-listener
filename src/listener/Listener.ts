@@ -70,6 +70,7 @@ export class Listener {
   createEventListener(contract) {
     this._logger.info(`Listening to events for ${contract.address}`);
     contract.on("*", async (event) => {
+      console.log(event);
       this._logger.info(
         `Event: ${event.event} for contract: ${contract.address}.`
       );
@@ -96,6 +97,7 @@ export class Listener {
 
   async addContract(address, type) {
     try {
+      console.log(type);
       const contract = new ethers.Contract(address, ABIs[type], this._provider);
       this.createEventListener(contract);
       //await this._saveContract(address, type);
