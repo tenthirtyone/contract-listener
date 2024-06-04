@@ -76,6 +76,7 @@ export class Listener {
       );
       try {
         if (this._parser[event.event]) {
+          // getTransactionData utility function
           const transaction = null;
           const receipt = null;
 

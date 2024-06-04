@@ -7,7 +7,7 @@ import { Event, TransferSingleEvent } from "@/types";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const logger = createLogger("Transfer");
 
-export const TransferSingle = async (
+export const Transfer = async (
   evt: Event,
   eventListener: any,
   transaction: any,
@@ -21,26 +21,26 @@ export const TransferSingle = async (
   const to = args[1];
   const tokenId = args[2].toNumber();
 
-  /*
-  
-  const operator = args[0];
-  const value = args[4].toNumber();
+  console.log(from);
+  console.log(to);
+  console.log(tokenId);
+  console.log(receipt);
 
   const price = eventListener.price;
 
-  const data: TransferSingleEvent = {
+  const data: any = {
     blockNumber,
     blockHash,
     address,
     transactionHash,
     event,
-    data: { operator, from, to, tokenId, value },
+    data: { from, to, tokenId },
     transaction,
     receipt,
     price,
   };
   logger.info("ERC721 Transfer Event");
-  
+
   if (from === ZERO_ADDRESS) {
     try {
       let sparseNft = await getSparseNft({
@@ -74,7 +74,7 @@ export const TransferSingle = async (
         token_address: address,
         identifier: tokenId.toString(),
         user_address: to,
-        incrementBy: value,
+        incrementBy: 1,
       });
     } catch (e) {
       logger.error(e);
@@ -88,21 +88,21 @@ export const TransferSingle = async (
         token_address: address,
         identifier: tokenId.toString(),
         user_address: to,
-        incrementBy: value,
+        incrementBy: 1,
       });
       await updateOrCreateBalance({
         chain: options.chain,
         token_address: address,
         identifier: tokenId.toString(),
         user_address: from,
-        incrementBy: -value,
+        incrementBy: -1,
       });
     } catch (e) {
       logger.error(e);
       throw e;
     }
   }
-*/
+
   return null;
 
   async function getSparseNft({

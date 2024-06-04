@@ -5,6 +5,7 @@ import {
   OrderFulfilled,
   OrdersMatched,
   OrderCancelled,
+  Transfer,
 } from "./events";
 import { EventParser as TEventParser } from "../types";
 
@@ -16,6 +17,7 @@ export function createEventParser(): TEventParser {
     OrderFulfilled,
     OrdersMatched,
     OrderCancelled,
+    Transfer,
   };
 }
 
@@ -28,6 +30,7 @@ export class EventParser {
       OrderFulfilled,
       OrdersMatched,
       OrderCancelled,
+      Transfer,
     };
   }
 }
