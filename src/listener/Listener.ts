@@ -127,6 +127,7 @@ export class Listener {
       contracts = await this._prisma.collection.findMany({
         where: {
           chain: this._options.chain,
+          is_dcentral: true,
         },
       });
       return contracts;

@@ -2,10 +2,10 @@ import { createLogger } from "../../logger";
 import { getTransactionData } from "@/utils";
 import { Event, TransferSingleEvent } from "@/types";
 
-// ERC1155 Transfer Event
+// ERC721 Transfer Event
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const logger = createLogger("TransferSingle");
+const logger = createLogger("Transfer");
 
 export const TransferSingle = async (
   evt: Event,
@@ -13,13 +13,17 @@ export const TransferSingle = async (
   transaction: any,
   receipt: any,
   context: any
-): Promise<TransferSingleEvent> => {
+): Promise<any> => {
   const { prisma, logger, options } = context;
+  console.log(evt);
   const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
+  const from = args[0];
+  const to = args[1];
+  const tokenId = args[2].toNumber();
+
+  /*
+  
   const operator = args[0];
-  const from = args[1];
-  const to = args[2];
-  const tokenId = args[3].toNumber();
   const value = args[4].toNumber();
 
   const price = eventListener.price;
@@ -35,7 +39,8 @@ export const TransferSingle = async (
     receipt,
     price,
   };
-
+  logger.info("ERC721 Transfer Event");
+  
   if (from === ZERO_ADDRESS) {
     try {
       let sparseNft = await getSparseNft({
@@ -97,8 +102,8 @@ export const TransferSingle = async (
       throw e;
     }
   }
-
-  return data;
+*/
+  return null;
 
   async function getSparseNft({
     chain,
