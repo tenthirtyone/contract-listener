@@ -21,11 +21,6 @@ export const Transfer = async (
   const to = args[1];
   const tokenId = args[2].toNumber();
 
-  console.log(from);
-  console.log(to);
-  console.log(tokenId);
-  console.log(receipt);
-
   const price = eventListener.price;
 
   const data: any = {
@@ -56,6 +51,7 @@ export const Transfer = async (
         delete sparseNft.createdAt;
         delete sparseNft.updatedAt;
 
+        logger.info(`Creating NFT: ${tokenId.toString()}`);
         await createNft({
           ...sparseNft,
           identifier: tokenId.toString(),
