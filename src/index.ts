@@ -4,21 +4,20 @@ import express from "express";
 import { createLogger } from "./logger";
 
 async function main() {
-  /*
   const ethereum = new Listener({
     providerUrl: process.env.ETHEREUM_URL,
     name: "EthereumListener",
     chain: 1,
   });
   await ethereum.start();
-*/
+
   const sepolia = new Listener({
     providerUrl: process.env.SEPOLIA_URL,
     name: "SepoliaListener",
     chain: 11155111,
   });
   await sepolia.start();
-  /*
+
   const polygon = new Listener({
     providerUrl: process.env.POLYGON_URL,
     name: "PolygonListener",
@@ -53,7 +52,6 @@ async function main() {
     chain: 42161,
   });
   await arbitrum.start();
-  */
 }
 
 main().catch((error) => {

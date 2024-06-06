@@ -95,7 +95,7 @@ export class Listener {
       }
     });
   }
-
+  /*
   async addContract(address, type) {
     try {
       console.log(type);

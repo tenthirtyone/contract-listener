@@ -225,6 +225,52 @@ export const abi = [
   {
     inputs: [
       {
+        components: [
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minPrice",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+        ],
+        internalType: "struct IERC721LazyMint.NFTVoucher",
+        name: "voucher",
+        type: "tuple",
+      },
+      {
+        internalType: "bytes",
+        name: "signature",
+        type: "bytes",
+      },
+    ],
+    name: "_verify",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "to",
         type: "address",
@@ -267,19 +313,6 @@ export const abi = [
         internalType: "string",
         name: "",
         type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "currentTokenId",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -522,37 +555,6 @@ export const abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-    ],
-    name: "mint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint64",
-        name: "amount",
-        type: "uint64",
-      },
-    ],
-    name: "mintBatch",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "name",
     outputs: [
@@ -582,6 +584,57 @@ export const abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "redeemer",
+        type: "address",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minPrice",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+        ],
+        internalType: "struct IERC721LazyMint.NFTVoucher",
+        name: "voucher",
+        type: "tuple",
+      },
+      {
+        internalType: "bytes",
+        name: "signature",
+        type: "bytes",
+      },
+    ],
+    name: "redeem",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
     type: "function",
   },
   {
