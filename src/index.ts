@@ -18,7 +18,7 @@ async function main() {
     chain: 11155111,
   });
   await sepolia.start();
-
+  /*
   const amoy = new Listener({
     providerUrl: process.env.AMOY_URL,
     name: "AmoyListener",
@@ -26,7 +26,7 @@ async function main() {
   });
   await amoy.start();
 
-  /*
+ 
 const polygon = new Listener({
   providerUrl: process.env.POLYGON_URL,
   name: "PolygonListener",
