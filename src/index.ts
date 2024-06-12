@@ -4,13 +4,14 @@ import express from "express";
 import { createLogger } from "./logger";
 
 async function main() {
+  /*
   const ethereum = new Listener({
     providerUrl: process.env.ETHEREUM_URL,
     name: "EthereumListener",
     chain: 1,
   });
   await ethereum.start();
-
+*/
   const sepolia = new Listener({
     providerUrl: process.env.SEPOLIA_URL,
     name: "SepoliaListener",
@@ -18,19 +19,21 @@ async function main() {
   });
   await sepolia.start();
 
-  const polygon = new Listener({
-    providerUrl: process.env.POLYGON_URL,
-    name: "PolygonListener",
-    chain: 137,
-  });
-  await polygon.start();
-
   const amoy = new Listener({
     providerUrl: process.env.AMOY_URL,
     name: "AmoyListener",
     chain: 80002,
   });
   await amoy.start();
+
+  /*
+const polygon = new Listener({
+  providerUrl: process.env.POLYGON_URL,
+  name: "PolygonListener",
+  chain: 137,
+});
+await polygon.start();
+
 
   const base = new Listener({
     providerUrl: process.env.BASE_URL,
@@ -52,8 +55,8 @@ async function main() {
     chain: 42161,
   });
   await arbitrum.start();
+  */
 }
-
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
