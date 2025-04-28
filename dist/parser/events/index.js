@@ -18,3 +18,4 @@ __exportStar(require("./ProxyDeployed"), exports);
 __exportStar(require("./TokenMint"), exports);
 __exportStar(require("./TransferSingle"), exports);
 __exportStar(require("./Seaport"), exports);
+__exportStar(require("./Transfer"), exports);

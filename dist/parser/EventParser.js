@@ -10,6 +10,7 @@ function createEventParser() {
         OrderFulfilled: events_1.OrderFulfilled,
         OrdersMatched: events_1.OrdersMatched,
         OrderCancelled: events_1.OrderCancelled,
+        Transfer: events_1.Transfer,
     };
 }
 exports.createEventParser = createEventParser;
@@ -22,6 +23,7 @@ class EventParser {
             OrderFulfilled: events_1.OrderFulfilled,
             OrdersMatched: events_1.OrdersMatched,
             OrderCancelled: events_1.OrderCancelled,
+            Transfer: events_1.Transfer,
         };
     }
 }

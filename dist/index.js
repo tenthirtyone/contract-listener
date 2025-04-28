@@ -32,27 +32,21 @@ const express_1 = __importDefault(require("express"));
 const logger_1 = require("./logger");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const ethereum = new listener_1.Listener({
-            providerUrl: process.env.ETHEREUM_URL,
-            name: "EthereumListener",
-            chain: 1,
-        });
-        yield ethereum.start();
         /*
-        const sepolia = new Listener({
-          providerUrl: process.env.SEPOLIA_URL,
-          name: "SepoliaListener",
-          chain: 11155111,
+        const ethereum = new Listener({
+          providerUrl: process.env.ETHEREUM_URL,
+          name: "EthereumListener",
+          chain: 1,
         });
-        await sepolia.start();
-      
-        const polygon = new Listener({
-          providerUrl: process.env.POLYGON_URL,
-          name: "PolygonListener",
-          chain: 137,
+        await ethereum.start();
+      */
+        const sepolia = new listener_1.Listener({
+            providerUrl: process.env.SEPOLIA_URL,
+            name: "SepoliaListener",
+            chain: 11155111,
         });
-        await polygon.start();
-      
+        yield sepolia.start();
+        /*
         const amoy = new Listener({
           providerUrl: process.env.AMOY_URL,
           name: "AmoyListener",
@@ -60,12 +54,35 @@ function main() {
         });
         await amoy.start();
       
+       
+      const polygon = new Listener({
+        providerUrl: process.env.POLYGON_URL,
+        name: "PolygonListener",
+        chain: 137,
+      });
+      await polygon.start();
+      
+      
         const base = new Listener({
-          providerUrl: process.env.AMOY_URL,
+          providerUrl: process.env.BASE_URL,
           name: "BaseListener",
           chain: 8453,
         });
         await base.start();
+      
+        const optimism = new Listener({
+          providerUrl: process.env.OPTIMISM_URL,
+          name: "OptimismListener",
+          chain: 10,
+        });
+        await optimism.start();
+      
+        const arbitrum = new Listener({
+          providerUrl: process.env.ARBITRUM_URL,
+          name: "ArbitrumListener",
+          chain: 42161,
+        });
+        await arbitrum.start();
         */
     });
 }

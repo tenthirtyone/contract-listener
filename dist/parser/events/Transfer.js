@@ -9,19 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TransferSingle = void 0;
+exports.Transfer = void 0;
 const logger_1 = require("../../logger");
-// ERC1155 Transfer Event
+// ERC721 Transfer Event
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const logger = (0, logger_1.createLogger)("TransferSingle");
-const TransferSingle = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
+const logger = (0, logger_1.createLogger)("Transfer");
+const Transfer = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma, logger, options } = context;
+    console.log(evt);
     const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const operator = args[0];
-    const from = args[1];
-    const to = args[2];
-    const tokenId = args[3].toNumber();
-    const value = args[4].toNumber();
+    const from = args[0];
+    const to = args[1];
+    const tokenId = args[2].toNumber();
     const price = eventListener.price;
     const data = {
         blockNumber,
@@ -29,11 +28,12 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
         address,
         transactionHash,
         event,
-        data: { operator, from, to, tokenId, value },
+        data: { from, to, tokenId },
         transaction,
         receipt,
         price,
     };
+    logger.info("ERC721 Transfer Event");
     if (from === ZERO_ADDRESS) {
         try {
             let sparseNft = yield getSparseNft({
@@ -47,6 +47,7 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
                 delete sparseNft.id;
                 delete sparseNft.createdAt;
                 delete sparseNft.updatedAt;
+                logger.info(`Creating NFT: ${tokenId.toString()}`);
                 yield createNft(Object.assign(Object.assign({}, sparseNft), { identifier: tokenId.toString(), chain: options.chain, transaction_hash: transactionHash }));
                 yield incrementCollectionSupply({
                     chain: options.chain,
@@ -58,7 +59,7 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
                 token_address: address,
                 identifier: tokenId.toString(),
                 user_address: to,
-                incrementBy: value,
+                incrementBy: 1,
             });
         }
         catch (e) {
@@ -74,14 +75,14 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
                 token_address: address,
                 identifier: tokenId.toString(),
                 user_address: to,
-                incrementBy: value,
+                incrementBy: 1,
             });
             yield updateOrCreateBalance({
                 chain: options.chain,
                 token_address: address,
                 identifier: tokenId.toString(),
                 user_address: from,
-                incrementBy: -value,
+                incrementBy: -1,
             });
         }
         catch (e) {
@@ -89,7 +90,7 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
             throw e;
         }
     }
-    return data;
+    return null;
     function getSparseNft({ chain, address, identifier, transaction_hash, }) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield prisma.sparseNft.findFirst({
@@ -189,4 +190,4 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
         });
     }
 });
-exports.TransferSingle = TransferSingle;
+exports.Transfer = Transfer;

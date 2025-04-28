@@ -22,9 +22,11 @@ __exportStar(require("./contracts"), exports);
 __exportStar(require("./webhooks"), exports);
 const BeaconABI_1 = require("./BeaconABI");
 const MultiTokenContract_json_1 = require("./MultiTokenContract.json");
+const ERC721ABI_1 = require("./ERC721ABI");
 const seaportAbi_json_1 = __importDefault(require("./seaportAbi.json"));
 exports.ABIs = {
     Beacon: BeaconABI_1.abi,
     ERC1155: MultiTokenContract_json_1.abi,
+    ERC721: ERC721ABI_1.abi,
     seaport15: seaportAbi_json_1.default,
 };

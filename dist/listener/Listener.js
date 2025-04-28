@@ -30,16 +30,23 @@ class Listener {
             this._parser = (0, parser_1.createEventParser)();
             this._logger = (0, logger_1.createLogger)(this._options.name);
             const contracts = yield this._getContracts();
-            console.log(Array.isArray(contracts));
-            /*
             contracts.push({
-              address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
-              type: "seaport15",
+                address: "0xb04a755a13d22Eda328460EA67622e630b680320",
+                type: "Beacon",
             });
-            */
+            contracts.push({
+                address: "0xD723f5B785b7922D60E4835fffd67f51aEC4f2cC",
+                type: "Beacon",
+            });
+            contracts.push({
+                address: "0xD49A798EA53e9Ad4A3D37879e44061D5aB11dF06",
+                type: "Beacon",
+            });
+            contracts.push({
+                address: "0xA3ce97aef057cbd00FDc1cA9BED8b6c5A457AA2B",
+                type: "Beacon",
+            });
             this._contracts = contracts.map((contract) => {
-                console.log(contract.address);
-                console.log(contract.type);
                 return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);
             });
             this.listenForEvents();
@@ -56,9 +63,11 @@ class Listener {
     createEventListener(contract) {
         this._logger.info(`Listening to events for ${contract.address}`);
         contract.on("*", (event) => __awaiter(this, void 0, void 0, function* () {
+            console.log(event);
             this._logger.info(`Event: ${event.event} for contract: ${contract.address}.`);
             try {
                 if (this._parser[event.event]) {
+                    // getTransactionData utility function
                     const transaction = null;
                     const receipt = null;
                     yield this._parser[event.event](event, this, transaction, receipt, {
@@ -76,18 +85,17 @@ class Listener {
             }
         }));
     }
-    addContract(address, type) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const contract = new ethers_1.ethers.Contract(address, data_1.ABIs[type], this._provider);
-                this.createEventListener(contract);
-                //await this._saveContract(address, type);
-                this._contracts.push(contract);
-            }
-            catch (e) {
-                console.error(e);
-            }
-        });
+    /*
+    async addContract(address, type) {
+      try {
+        console.log(type);
+        const contract = new ethers.Contract(address, ABIs[type], this._provider);
+        this.createEventListener(contract);
+        //await this._saveContract(address, type);
+        this._contracts.push(contract);
+      } catch (e) {
+        console.error(e);
+      }
     }
     /*
     async _saveContract(address, type) {
@@ -111,6 +119,7 @@ class Listener {
                 contracts = yield this._prisma.collection.findMany({
                     where: {
                         chain: this._options.chain,
+                        is_dcentral: true,
                     },
                 });
                 return contracts;
