@@ -31,8 +31,8 @@ class Listener {
             this._logger = (0, logger_1.createLogger)(this._options.name);
             const contracts = yield this._getContracts();
             contracts.push({
-                address: "0xb04a755a13d22Eda328460EA67622e630b680320",
-                type: "Beacon",
+                address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
+                type: "CTFExchange",
             });
             this._contracts = contracts.map((contract) => {
                 return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);

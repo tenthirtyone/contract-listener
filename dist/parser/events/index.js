@@ -19,3 +19,4 @@ __exportStar(require("./TokenMint"), exports);
 __exportStar(require("./TransferSingle"), exports);
 __exportStar(require("./Seaport"), exports);
 __exportStar(require("./Transfer"), exports);
+__exportStar(require("./CTFExchange"), exports);
