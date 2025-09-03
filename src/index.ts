@@ -12,12 +12,12 @@ async function main() {
   });
   await ethereum.start();
 */
-  const sepolia = new Listener({
-    providerUrl: process.env.SEPOLIA_URL,
-    name: "SepoliaListener",
-    chain: 11155111,
-  });
-  await sepolia.start();
+  //const sepolia = new Listener({
+  //  providerUrl: process.env.SEPOLIA_URL,
+  //  name: "SepoliaListener",
+  //  chain: 11155111,
+  //});
+  //await sepolia.start();
   /*
   const amoy = new Listener({
     providerUrl: process.env.AMOY_URL,
@@ -34,14 +34,14 @@ const polygon = new Listener({
 });
 await polygon.start();
 
-
+*/
   const base = new Listener({
     providerUrl: process.env.BASE_URL,
     name: "BaseListener",
     chain: 8453,
   });
   await base.start();
-
+  /*
   const optimism = new Listener({
     providerUrl: process.env.OPTIMISM_URL,
     name: "OptimismListener",

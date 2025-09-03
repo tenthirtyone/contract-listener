@@ -40,12 +40,12 @@ function main() {
         });
         await ethereum.start();
       */
-        const sepolia = new listener_1.Listener({
-            providerUrl: process.env.SEPOLIA_URL,
-            name: "SepoliaListener",
-            chain: 11155111,
-        });
-        yield sepolia.start();
+        //const sepolia = new Listener({
+        //  providerUrl: process.env.SEPOLIA_URL,
+        //  name: "SepoliaListener",
+        //  chain: 11155111,
+        //});
+        //await sepolia.start();
         /*
         const amoy = new Listener({
           providerUrl: process.env.AMOY_URL,
@@ -62,14 +62,14 @@ function main() {
       });
       await polygon.start();
       
-      
-        const base = new Listener({
-          providerUrl: process.env.BASE_URL,
-          name: "BaseListener",
-          chain: 8453,
+      */
+        const base = new listener_1.Listener({
+            providerUrl: process.env.BASE_URL,
+            name: "BaseListener",
+            chain: 8453,
         });
-        await base.start();
-      
+        yield base.start();
+        /*
         const optimism = new Listener({
           providerUrl: process.env.OPTIMISM_URL,
           name: "OptimismListener",

@@ -7,8 +7,6 @@ import { createLogger } from "../logger";
 import { ABIs, BEACON_CONTRACT } from "../data";
 export class Listener {
   private _prisma: PrismaClient;
-  private _opensearch: any;
-  private _seaport: any;
   private _options: ListenerOptions;
   private _contracts: ethers.Contract[];
   private _provider: ethers.providers.JsonRpcProvider;
@@ -35,18 +33,6 @@ export class Listener {
     const contracts = await this._getContracts();
     contracts.push({
       address: "0xb04a755a13d22Eda328460EA67622e630b680320",
-      type: "Beacon",
-    });
-    contracts.push({
-      address: "0xD723f5B785b7922D60E4835fffd67f51aEC4f2cC",
-      type: "Beacon",
-    });
-    contracts.push({
-      address: "0xD49A798EA53e9Ad4A3D37879e44061D5aB11dF06",
-      type: "Beacon",
-    });
-    contracts.push({
-      address: "0xA3ce97aef057cbd00FDc1cA9BED8b6c5A457AA2B",
       type: "Beacon",
     });
 
