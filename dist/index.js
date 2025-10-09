@@ -35,7 +35,13 @@ const LISTENER_CONFIGS = [
         providerUrl: process.env.ETHEREUM_URL ||
             `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
         name: "TestListener",
-        chain: 137, // Polygon mainnet
+        chain: 137,
+        contracts: [
+            {
+                address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
+                type: "CTFExchange",
+            },
+        ],
     },
 ];
 function main() {
@@ -45,9 +51,6 @@ function main() {
         console.log(`Created ${listeners.length} listeners`);
         yield Promise.all(listeners.map((listener) => listener.start()));
         console.log("Listeners started");
-        // Add CTFExchange contract to all listeners
-        yield Promise.all(listeners.map((listener) => listener.addContract("0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", "CTFExchange")));
-        console.log("CTFExchange contract added");
         // Keep the process running
         console.log("Listener is running... Press Ctrl+C to exit");
     });

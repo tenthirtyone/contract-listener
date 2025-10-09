@@ -1,4 +1,5 @@
 import { Listener } from "./listener";
+import { LibraryContract } from "./types";
 export * from "./types";
 import express from "express";
 import { createLogger } from "./logger";
@@ -7,6 +8,7 @@ interface ListenerConfig {
   providerUrl: string | undefined;
   name: string;
   chain: number;
+  contracts: LibraryContract[];
 }
 
 const LISTENER_CONFIGS: ListenerConfig[] = [
@@ -16,6 +18,12 @@ const LISTENER_CONFIGS: ListenerConfig[] = [
       `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
     name: "TestListener",
     chain: 137, // Polygon mainnet
+    contracts: [
+      {
+        address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
+        type: "CTFExchange",
+      },
+    ],
   },
 ];
 
@@ -29,17 +37,6 @@ async function main() {
 
   await Promise.all(listeners.map((listener) => listener.start()));
   console.log("Listeners started");
-
-  // Add CTFExchange contract to all listeners
-  await Promise.all(
-    listeners.map((listener) =>
-      listener.addContract(
-        "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
-        "CTFExchange"
-      )
-    )
-  );
-  console.log("CTFExchange contract added");
 
   // Keep the process running
   console.log("Listener is running... Press Ctrl+C to exit");

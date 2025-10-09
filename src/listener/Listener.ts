@@ -1,18 +1,17 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
-import { EventParser as TEventParser, ListenerOptions } from "../types";
+import {
+  EventParser as TEventParser,
+  ListenerOptions,
+  LibraryContract,
+} from "../types";
 import { EventParsers, EventParserLookup } from "../parser";
 import { createLogger } from "../logger";
 import { ABIs } from "../data";
 
-export interface MonitoredContract {
-  address: string;
-  type: string;
-}
+export interface MonitoredContract extends LibraryContract {}
 
 export class Listener {
-  private _prisma: PrismaClient;
   private _options: ListenerOptions;
   private _contractInstances: ethers.Contract[] = [];
   private _provider: ethers.providers.JsonRpcProvider;
@@ -21,17 +20,20 @@ export class Listener {
   private _runtimeContracts: MonitoredContract[] = [];
   private _contractTypes: Map<string, string> = new Map();
 
-  constructor(options?: Partial<ListenerOptions>) {
-    this._options = { ...Listener.DEFAULTS, ...options };
+  constructor(options: ListenerOptions) {
+    this._options = options;
 
     if (!this._options.providerUrl) {
       throw new Error("No providerUrl provided.");
     }
 
+    if (!this._options.contracts) {
+      throw new Error("No contracts provided.");
+    }
+
     this._provider = new ethers.providers.JsonRpcProvider(
       this._options.providerUrl
     );
-    this._prisma = new PrismaClient();
   }
 
   async start() {
@@ -44,18 +46,25 @@ export class Listener {
   }
 
   private async initializeContracts() {
-    const contracts = await this.loadDatabaseContracts();
+    // Start with contracts provided in options
+    let contracts = [...this._options.contracts];
 
-    // Add any additional contracts that were registered
+    // Add any additional contracts that were registered at runtime
     contracts.push(...this._runtimeContracts);
 
-    // Store contract types for lookup
+    // Store contract types for lookup and register custom parsers
     contracts.forEach((contract) => {
       this._contractTypes.set(contract.address.toLowerCase(), contract.type);
+
+      // Register custom parsers if provided
+      if (contract.parsers) {
+        this._eventParsers.addParsers(contract.type, contract.parsers);
+      }
     });
 
     this._contractInstances = contracts.map((contract) => {
-      const abi = ABIs[contract.type];
+      // Use custom ABI if provided, otherwise fall back to built-in ABIs
+      const abi = contract.abi || ABIs[contract.type];
       if (!abi) {
         this._logger.warn(`No ABI found for contract type: ${contract.type}`);
       }
@@ -99,7 +108,6 @@ export class Listener {
             transaction,
             receipt,
             {
-              prisma: this._prisma,
               logger: this._logger,
               options: this._options,
             }
@@ -111,18 +119,19 @@ export class Listener {
     });
   }
   // Add a contract to listen to dynamically
-  async addContract(address: string, type: string): Promise<void> {
+  async addContract(address: string, type: string, abi?: any): Promise<void> {
     try {
       this._logger.info(`Adding contract ${address} of type ${type}`);
 
+      const contractAbi = abi || ABIs[type] || [];
       const contract = new ethers.Contract(
         address,
-        ABIs[type] || [],
+        contractAbi,
         this._provider
       );
       this.attachEventHandler(contract);
       this._contractInstances.push(contract);
-      this._runtimeContracts.push({ address, type });
+      this._runtimeContracts.push({ address, type, abi });
       this._contractTypes.set(address.toLowerCase(), type);
 
       this._logger.info(`Contract ${address} added successfully`);
@@ -140,11 +149,6 @@ export class Listener {
   // Get the provider instance
   getProvider(): ethers.providers.JsonRpcProvider {
     return this._provider;
-  }
-
-  // Get the prisma client
-  getPrisma(): PrismaClient {
-    return this._prisma;
   }
 
   // Get current options
@@ -174,40 +178,7 @@ export class Listener {
     // Clear contracts array
     this._contractInstances = [];
 
-    // Close Prisma connection
-    await this._prisma.$disconnect();
-
     this._logger.info("Event listener stopped");
-  }
-
-  private async loadDatabaseContracts(): Promise<MonitoredContract[]> {
-    let contracts: MonitoredContract[] = [];
-    try {
-      const collections = await this._prisma.collection.findMany({
-        where: {
-          chain: this._options.chain,
-        },
-      });
-
-      // Map database collections to MonitoredContract format
-      contracts = collections.map((collection) => ({
-        address: collection.address,
-        type: collection.type || "ERC721", // Default type if not specified
-      }));
-
-      return contracts;
-    } catch (error) {
-      this._logger.error("Failed to fetch contracts from database:", error);
-      return [];
-    }
-  }
-
-  static get DEFAULTS(): ListenerOptions {
-    return {
-      name: "Event Listener",
-      chain: 1,
-      providerUrl: process.env.ETHEREUM_URL || "",
-    };
   }
 }
 

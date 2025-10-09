@@ -11,9 +11,9 @@ datasource db {
 }
 
 model User {
-  address       String      @id
-  email         String?     @unique
-  username      String?     @unique
+  address       String  @id
+  email         String? @unique
+  username      String? @unique
   password      String?
   first_name    String?
   last_name     String?
@@ -22,8 +22,7 @@ model User {
   bio           String?
   profile_image String?
   banner_image  String?
-  verified      Boolean     @default(false)
-  nfts          NftOwners[]
+  verified      Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -38,110 +37,13 @@ model Nonce {
   updatedAt DateTime @updatedAt
 }
 
-enum CollectionState {
-  PENDING
-  FAILED
-  MINED
-}
-
-model Collection {
-  address             String
-  name                String?
-  symbol              String?
-  description         String?
-  logo                String?
-  image               String?
-  banner              String?
-  type                String?
-  chain               Int
-  network             String?
-  royalty_base_points Int?
-  royalty_denominator Int             @default(10000)
-  royalty_address     String?
-  total_supply        Int             @default(0)
-  transaction_hash    String?
-  transaction_state   CollectionState @default(PENDING)
-  creator             String?
-  owner               String?
-  is_dcentral         Boolean         @default(true)
-  is_official         Boolean         @default(false)
-  lazymint            Boolean?        @default(false)
-  nsfw                Boolean?        @default(false)
-  social_links        Json?
-  license             Json?
-  nonce               String
-  nfts                Nft[]
+model Contract {
+  address String
+  type    String
+  chain   Int
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
   @@id([address, chain])
-}
-
-model Nft {
-  chain            Int
-  address          String
-  identifier       String
-  supply           Int
-  name             String?
-  image            String?
-  transaction_hash String?
-  description      String?
-  media            Json?
-  attributes       Json?
-  creator          String
-
-  collection Collection  @relation(fields: [address, chain], references: [address, chain])
-  owners     NftOwners[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
-
-  @@id([chain, address, identifier])
-}
-
-// Sparse Ownership table
-model NftOwners {
-  chain         Int
-  token_address String
-  identifier    String
-  user_address  String
-  balance       Int
-
-  User User? @relation(fields: [user_address], references: [address])
-  Nft  Nft   @relation(fields: [chain, token_address, identifier], references: [chain, address, identifier])
-
-  @@id([chain, token_address, identifier, user_address])
-}
-
-// We support two forms of minting, direct mint where the transaction hash is known before the id, and lazy mint where the id is known before the transaction hash.
-// And, Lazy Mint can have multiple vouchers for the same id. So... upsert and guarantee only the latest data will be used, however old prices on valid vouchers may still work. 
-model SparseNft {
-  id               Int     @id @default(autoincrement())
-  chain            Int?
-  address          String?
-  identifier       String?
-  name             String?
-  image            String?
-  transaction_hash String?
-  supply           Int?
-  description      String?
-  media            Json?
-  attributes       Json?
-  creator          String?
-}
-
-// Since vouchers are offchain, technically, the user may create an unlimited number of bespoke vouchers per NFT. On the front end, we will prevent it
-// But they don't, technically, need Dcentral to do this. We want to track everything they create but we will not allow the FE to create new vouchers, for now.
-model LazymintVoucher {
-  id           Int     @id @default(autoincrement())
-  chain        Int
-  address      String
-  identifier   String
-  creator      String
-  voucher_data Json
-  valid        Boolean @default(true)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
 }
