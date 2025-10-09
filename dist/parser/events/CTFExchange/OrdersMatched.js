@@ -17,7 +17,6 @@ const OrdersMatched = (evt, eventListener, transaction, receipt, context) => __a
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [takerOrderHash, takerOrderMaker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled,] = parameters;
     logger.info(`Orders matched - Taker Order: ${takerOrderHash}, Maker: ${takerOrderMaker}`);
-    console.log("#############");
     // TODO: Update order status and handle matching data
     // For example:
     // await prisma.ctfOrder.update({ where: { orderHash: takerOrderHash }, data: { matched: true } });

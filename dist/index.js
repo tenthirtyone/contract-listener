@@ -32,7 +32,8 @@ const express_1 = __importDefault(require("express"));
 const logger_1 = require("./logger");
 const LISTENER_CONFIGS = [
     {
-        providerUrl: process.env.ETHEREUM_URL || `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+        providerUrl: process.env.ETHEREUM_URL ||
+            `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
         name: "TestListener",
         chain: 137, // Polygon mainnet
     },
@@ -47,6 +48,8 @@ function main() {
         // Add CTFExchange contract to all listeners
         yield Promise.all(listeners.map((listener) => listener.addContract("0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", "CTFExchange")));
         console.log("CTFExchange contract added");
+        // Keep the process running
+        console.log("Listener is running... Press Ctrl+C to exit");
     });
 }
 main().catch((error) => {
@@ -54,7 +57,7 @@ main().catch((error) => {
     process.exitCode = 1;
 });
 // Only start web server if not in test mode
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
     const logger = (0, logger_1.createLogger)("contract-listener");
     const app = (0, express_1.default)();
     const port = process.env.PORT || 8080;

@@ -73,7 +73,7 @@ class Listener {
                     });
                 }
                 else {
-                    console.log(`Event: "${event.event}" received, no matching parser. Available parsers: ${Object.keys(this._eventParsers).join(', ')}`);
+                    console.log(`Event: "${event.event}" received, no matching parser. Available parsers: ${Object.keys(this._eventParsers).join(", ")}`);
                     this._logger.debug(`Event: ${event.event} received, no matching parser`);
                 }
             }

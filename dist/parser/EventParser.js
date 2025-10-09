@@ -8,12 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventParser = exports.createEventParser = void 0;
-const CTFExchange_1 = __importDefault(require("./events/CTFExchange"));
 // Transform raw ethers event to ParsedEvent
 function transformEvent(rawEvent) {
     return {
@@ -28,18 +24,38 @@ function transformEvent(rawEvent) {
         receipt: rawEvent.receipt,
     };
 }
-function createEventParser() {
-    const parsers = {};
-    // Directly map each parser from CTFExchange
-    CTFExchange_1.default.parsers.forEach((parserFunction) => {
-        if (typeof parserFunction === "function") {
-            // Use the function name directly as the event name
-            const eventName = parserFunction.name;
-            parsers[eventName] = (rawEvent, eventListener, transaction, receipt, context) => __awaiter(this, void 0, void 0, function* () {
-                const parsedEvent = transformEvent(rawEvent);
-                yield parserFunction(parsedEvent, eventListener, transaction, receipt, context);
+// Dynamic parser registration
+function registerParsers() {
+    const parsers = new Map();
+    try {
+        // Dynamically import all contract parsers
+        const eventsModule = require("./events");
+        if (eventsModule.default && eventsModule.default.parsers) {
+            eventsModule.default.parsers.forEach((contractParsers) => {
+                if (contractParsers && contractParsers.parsers) {
+                    contractParsers.parsers.forEach((parserFunction) => {
+                        if (typeof parserFunction === "function") {
+                            const eventName = parserFunction.name;
+                            parsers.set(eventName, parserFunction);
+                        }
+                    });
+                }
             });
         }
+    }
+    catch (error) {
+        console.error("Failed to register parsers:", error);
+    }
+    return parsers;
+}
+const registeredParsers = registerParsers();
+function createEventParser() {
+    const parsers = {};
+    registeredParsers.forEach((parserFunction, eventName) => {
+        parsers[eventName] = (rawEvent, eventListener, transaction, receipt, context) => __awaiter(this, void 0, void 0, function* () {
+            const parsedEvent = transformEvent(rawEvent);
+            yield parserFunction(parsedEvent, eventListener, transaction, receipt, context);
+        });
     });
     return parsers;
 }
@@ -47,6 +63,10 @@ exports.createEventParser = createEventParser;
 class EventParser {
     static create() {
         return createEventParser();
+    }
+    // Allow manual registration if needed
+    static registerParser(eventName, parser) {
+        registeredParsers.set(eventName, parser);
     }
 }
 exports.EventParser = EventParser;
