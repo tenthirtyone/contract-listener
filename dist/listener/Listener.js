@@ -18,6 +18,8 @@ const logger_1 = require("../logger");
 const data_1 = require("../data");
 class Listener {
     constructor(options) {
+        this._contractInstances = [];
+        this._runtimeContracts = [];
         this._options = Object.assign(Object.assign({}, Listener.DEFAULTS), options);
         if (!this._options.providerUrl) {
             throw new Error("No providerUrl provided.");
@@ -27,95 +29,127 @@ class Listener {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            this._parser = (0, parser_1.createEventParser)();
+            this._eventParsers = (0, parser_1.createEventParser)();
             this._logger = (0, logger_1.createLogger)(this._options.name);
-            const contracts = yield this._getContracts();
-            contracts.push({
-                address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
-                type: "CTFExchange",
-            });
-            this._contracts = contracts.map((contract) => {
-                return new ethers_1.ethers.Contract(contract.address, data_1.ABIs[contract.type], this._provider);
-            });
-            this.listenForEvents();
+            yield this.initializeContracts();
+            this.setupEventListeners();
             this._logger.info("Event Listener started");
         });
     }
-    listenForEvents() {
+    initializeContracts() {
         return __awaiter(this, void 0, void 0, function* () {
-            this._contracts.forEach((contract) => {
-                this.createEventListener(contract);
+            const contracts = yield this.loadDatabaseContracts();
+            // Add any additional contracts that were registered
+            contracts.push(...this._runtimeContracts);
+            this._contractInstances = contracts.map((contract) => {
+                const abi = data_1.ABIs[contract.type];
+                if (!abi) {
+                    this._logger.warn(`No ABI found for contract type: ${contract.type}`);
+                }
+                return new ethers_1.ethers.Contract(contract.address, abi || [], this._provider);
             });
         });
     }
-    createEventListener(contract) {
+    setupEventListeners() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this._contractInstances.forEach((contract) => {
+                this.attachEventHandler(contract);
+            });
+        });
+    }
+    attachEventHandler(contract) {
         this._logger.info(`Listening to events for ${contract.address}`);
         contract.on("*", (event) => __awaiter(this, void 0, void 0, function* () {
-            console.log(event);
-            this._logger.info(`Event: ${event.event} for contract: ${contract.address}.`);
+            this._logger.info(`Event: ${event.event} for contract: ${contract.address}`);
             try {
-                if (this._parser[event.event]) {
-                    // getTransactionData utility function
-                    const transaction = null;
-                    const receipt = null;
-                    yield this._parser[event.event](event, this, transaction, receipt, {
+                if (this._eventParsers[event.event]) {
+                    // Get transaction and receipt data
+                    const transaction = yield this._provider.getTransaction(event.transactionHash);
+                    const receipt = yield this._provider.getTransactionReceipt(event.transactionHash);
+                    yield this._eventParsers[event.event](event, this, transaction, receipt, {
                         prisma: this._prisma,
                         logger: this._logger,
                         options: this._options,
                     });
                 }
                 else {
-                    this._logger.info(`Event: ${event.event} received, no matching parser.`);
+                    this._logger.debug(`Event: ${event.event} received, no matching parser`);
                 }
             }
-            catch (e) {
-                this._logger.error(e);
+            catch (error) {
+                this._logger.error(`Error processing event ${event.event}:`, error);
             }
         }));
     }
-    /*
-    async addContract(address, type) {
-      try {
-        console.log(type);
-        const contract = new ethers.Contract(address, ABIs[type], this._provider);
-        this.createEventListener(contract);
-        //await this._saveContract(address, type);
-        this._contracts.push(contract);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    /*
-    async _saveContract(address, type) {
-      this._logger.info(`Saving ${type} at address: ${address}`);
-      try {
-        await this._prisma.contract.create({
-          data: {
-            address,
-            type,
-          },
+    // Add a contract to listen to dynamically
+    addContract(address, type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                this._logger.info(`Adding contract ${address} of type ${type}`);
+                const contract = new ethers_1.ethers.Contract(address, data_1.ABIs[type] || [], this._provider);
+                this.attachEventHandler(contract);
+                this._contractInstances.push(contract);
+                this._runtimeContracts.push({ address, type });
+                this._logger.info(`Contract ${address} added successfully`);
+            }
+            catch (error) {
+                this._logger.error(`Failed to add contract ${address}:`, error);
+                throw error;
+            }
         });
-      } catch (e) {
-        this._logger.error(e);
-      }
     }
-  */
-    _getContracts() {
+    // Get all currently listening contracts
+    getContracts() {
+        return [...this._contractInstances];
+    }
+    // Get the provider instance
+    getProvider() {
+        return this._provider;
+    }
+    // Get the prisma client
+    getPrisma() {
+        return this._prisma;
+    }
+    // Get current options
+    getOptions() {
+        return Object.assign({}, this._options);
+    }
+    // Stop the listener and clean up
+    stop() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this._logger.info("Stopping event listener");
+            // Remove all event listeners
+            this._contractInstances.forEach((contract) => {
+                contract.removeAllListeners();
+            });
+            // Clear contracts array
+            this._contractInstances = [];
+            // Close Prisma connection
+            yield this._prisma.$disconnect();
+            this._logger.info("Event listener stopped");
+        });
+    }
+    loadDatabaseContracts() {
         return __awaiter(this, void 0, void 0, function* () {
             let contracts = [];
             try {
-                contracts = yield this._prisma.collection.findMany({
+                const collections = yield this._prisma.collection.findMany({
                     where: {
                         chain: this._options.chain,
                         is_dcentral: true,
                     },
                 });
+                // Map database collections to MonitoredContract format
+                contracts = collections.map((collection) => ({
+                    address: collection.address,
+                    type: collection.type || "ERC721", // Default type if not specified
+                }));
                 return contracts;
             }
-            catch (e) {
-                this._logger.error(e);
+            catch (error) {
+                this._logger.error("Failed to fetch contracts from database:", error);
+                return [];
             }
-            return contracts;
         });
     }
     static get DEFAULTS() {
@@ -123,9 +157,6 @@ class Listener {
             name: "Event Listener",
             chain: 1,
             providerUrl: process.env.ETHEREUM_URL || "",
-            opensearchUser: process.env.OPENSEARCH_USERNAME || "",
-            opensearchPass: process.env.OPENSEARCH_PASSWORD || "",
-            opensearchNode: process.env.OPENSEARCH_NODE || "",
         };
     }
 }

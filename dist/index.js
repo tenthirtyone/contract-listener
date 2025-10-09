@@ -30,60 +30,19 @@ const listener_1 = require("./listener");
 __exportStar(require("./types"), exports);
 const express_1 = __importDefault(require("express"));
 const logger_1 = require("./logger");
+const LISTENER_CONFIGS = [
+    {
+        providerUrl: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+        name: "PolygonListener",
+        chain: 8453,
+    },
+];
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        /*
-        const ethereum = new Listener({
-          providerUrl: process.env.ETHEREUM_URL,
-          name: "EthereumListener",
-          chain: 1,
-        });
-        await ethereum.start();
-      */
-        //const sepolia = new Listener({
-        //  providerUrl: process.env.SEPOLIA_URL,
-        //  name: "SepoliaListener",
-        //  chain: 11155111,
-        //});
-        //await sepolia.start();
-        /*
-        const amoy = new Listener({
-          providerUrl: process.env.AMOY_URL,
-          name: "AmoyListener",
-          chain: 80002,
-        });
-        await amoy.start();
-      
-       
-      const polygon = new Listener({
-        providerUrl: process.env.POLYGON_URL,
-        name: "PolygonListener",
-        chain: 137,
-      });
-      await polygon.start();
-      
-      */
-        const base = new listener_1.Listener({
-            providerUrl: process.env.BASE_URL,
-            name: "BaseListener",
-            chain: 8453,
-        });
-        yield base.start();
-        /*
-        const optimism = new Listener({
-          providerUrl: process.env.OPTIMISM_URL,
-          name: "OptimismListener",
-          chain: 10,
-        });
-        await optimism.start();
-      
-        const arbitrum = new Listener({
-          providerUrl: process.env.ARBITRUM_URL,
-          name: "ArbitrumListener",
-          chain: 42161,
-        });
-        await arbitrum.start();
-        */
+        const listeners = LISTENER_CONFIGS.filter((config) => config.providerUrl).map((config) => new listener_1.Listener(config));
+        yield Promise.all(listeners.map((listener) => listener.start()));
+        // Add CTFExchange contract to all listeners
+        yield Promise.all(listeners.map((listener) => listener.addContract("0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E", "CTFExchange")));
     });
 }
 main().catch((error) => {
@@ -93,5 +52,5 @@ main().catch((error) => {
 const logger = (0, logger_1.createLogger)("contract-listener");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
-app.get("/", (req, res) => res.send(true));
+app.get("/", (_req, res) => res.send(true));
 app.listen(port, () => logger.info(`Server is running on port ${port}`));

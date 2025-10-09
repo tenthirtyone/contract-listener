@@ -4,14 +4,21 @@ import { ethers } from "ethers";
 import { EventParser, ListenerOptions } from "../types";
 import { createEventParser } from "../parser";
 import { createLogger } from "../logger";
-import { ABIs, BEACON_CONTRACT } from "../data";
+import { ABIs } from "../data";
+
+export interface MonitoredContract {
+  address: string;
+  type: string;
+}
+
 export class Listener {
   private _prisma: PrismaClient;
   private _options: ListenerOptions;
-  private _contracts: ethers.Contract[];
+  private _contractInstances: ethers.Contract[] = [];
   private _provider: ethers.providers.JsonRpcProvider;
-  private _parser: EventParser;
-  private _logger;
+  private _eventParsers: EventParser;
+  private _logger: any;
+  private _runtimeContracts: MonitoredContract[] = [];
 
   constructor(options?: Partial<ListenerOptions>) {
     this._options = { ...Listener.DEFAULTS, ...options };
@@ -27,102 +34,153 @@ export class Listener {
   }
 
   async start() {
-    this._parser = createEventParser();
+    this._eventParsers = createEventParser();
     this._logger = createLogger(this._options.name);
 
-    const contracts = await this._getContracts();
-    contracts.push({
-      address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
-      type: "CTFExchange",
-    });
-
-    this._contracts = contracts.map((contract) => {
-      return new ethers.Contract(
-        contract.address,
-        ABIs[contract.type],
-        this._provider
-      );
-    });
-    this.listenForEvents();
+    await this.initializeContracts();
+    this.setupEventListeners();
     this._logger.info("Event Listener started");
   }
 
-  async listenForEvents() {
-    this._contracts.forEach((contract) => {
-      this.createEventListener(contract);
+  private async initializeContracts() {
+    const contracts = await this.loadDatabaseContracts();
+
+    // Add any additional contracts that were registered
+    contracts.push(...this._runtimeContracts);
+
+    this._contractInstances = contracts.map((contract) => {
+      const abi = ABIs[contract.type];
+      if (!abi) {
+        this._logger.warn(`No ABI found for contract type: ${contract.type}`);
+      }
+      return new ethers.Contract(contract.address, abi || [], this._provider);
     });
   }
 
-  createEventListener(contract) {
+  async setupEventListeners() {
+    this._contractInstances.forEach((contract) => {
+      this.attachEventHandler(contract);
+    });
+  }
+
+  attachEventHandler(contract: ethers.Contract) {
     this._logger.info(`Listening to events for ${contract.address}`);
     contract.on("*", async (event) => {
-      console.log(event);
       this._logger.info(
-        `Event: ${event.event} for contract: ${contract.address}.`
+        `Event: ${event.event} for contract: ${contract.address}`
       );
-      try {
-        if (this._parser[event.event]) {
-          // getTransactionData utility function
-          const transaction = null;
-          const receipt = null;
 
-          await this._parser[event.event](event, this, transaction, receipt, {
-            prisma: this._prisma,
-            logger: this._logger,
-            options: this._options,
-          });
+      try {
+        if (this._eventParsers[event.event]) {
+          // Get transaction and receipt data
+          const transaction = await this._provider.getTransaction(
+            event.transactionHash
+          );
+          const receipt = await this._provider.getTransactionReceipt(
+            event.transactionHash
+          );
+
+          await this._eventParsers[event.event](
+            event,
+            this,
+            transaction,
+            receipt,
+            {
+              prisma: this._prisma,
+              logger: this._logger,
+              options: this._options,
+            }
+          );
         } else {
-          this._logger.info(
-            `Event: ${event.event} received, no matching parser.`
+          this._logger.debug(
+            `Event: ${event.event} received, no matching parser`
           );
         }
-      } catch (e) {
-        this._logger.error(e);
+      } catch (error) {
+        this._logger.error(`Error processing event ${event.event}:`, error);
       }
     });
   }
-  /*
-  async addContract(address, type) {
+  // Add a contract to listen to dynamically
+  async addContract(address: string, type: string): Promise<void> {
     try {
-      console.log(type);
-      const contract = new ethers.Contract(address, ABIs[type], this._provider);
-      this.createEventListener(contract);
-      //await this._saveContract(address, type);
-      this._contracts.push(contract);
-    } catch (e) {
-      console.error(e);
+      this._logger.info(`Adding contract ${address} of type ${type}`);
+
+      const contract = new ethers.Contract(
+        address,
+        ABIs[type] || [],
+        this._provider
+      );
+      this.attachEventHandler(contract);
+      this._contractInstances.push(contract);
+      this._runtimeContracts.push({ address, type });
+
+      this._logger.info(`Contract ${address} added successfully`);
+    } catch (error) {
+      this._logger.error(`Failed to add contract ${address}:`, error);
+      throw error;
     }
   }
-  /*
-  async _saveContract(address, type) {
-    this._logger.info(`Saving ${type} at address: ${address}`);
-    try {
-      await this._prisma.contract.create({
-        data: {
-          address,
-          type,
-        },
-      });
-    } catch (e) {
-      this._logger.error(e);
-    }
+
+  // Get all currently listening contracts
+  getContracts(): ethers.Contract[] {
+    return [...this._contractInstances];
   }
-*/
-  async _getContracts() {
-    let contracts = [];
+
+  // Get the provider instance
+  getProvider(): ethers.providers.JsonRpcProvider {
+    return this._provider;
+  }
+
+  // Get the prisma client
+  getPrisma(): PrismaClient {
+    return this._prisma;
+  }
+
+  // Get current options
+  getOptions(): ListenerOptions {
+    return { ...this._options };
+  }
+
+  // Stop the listener and clean up
+  async stop(): Promise<void> {
+    this._logger.info("Stopping event listener");
+
+    // Remove all event listeners
+    this._contractInstances.forEach((contract) => {
+      contract.removeAllListeners();
+    });
+
+    // Clear contracts array
+    this._contractInstances = [];
+
+    // Close Prisma connection
+    await this._prisma.$disconnect();
+
+    this._logger.info("Event listener stopped");
+  }
+
+  private async loadDatabaseContracts(): Promise<MonitoredContract[]> {
+    let contracts: MonitoredContract[] = [];
     try {
-      contracts = await this._prisma.collection.findMany({
+      const collections = await this._prisma.collection.findMany({
         where: {
           chain: this._options.chain,
           is_dcentral: true,
         },
       });
-      return contracts;
-    } catch (e) {
-      this._logger.error(e);
-    }
 
-    return contracts;
+      // Map database collections to MonitoredContract format
+      contracts = collections.map((collection) => ({
+        address: collection.address,
+        type: collection.type || "ERC721", // Default type if not specified
+      }));
+
+      return contracts;
+    } catch (error) {
+      this._logger.error("Failed to fetch contracts from database:", error);
+      return [];
+    }
   }
 
   static get DEFAULTS(): ListenerOptions {
@@ -130,9 +188,6 @@ export class Listener {
       name: "Event Listener",
       chain: 1,
       providerUrl: process.env.ETHEREUM_URL || "",
-      opensearchUser: process.env.OPENSEARCH_USERNAME || "",
-      opensearchPass: process.env.OPENSEARCH_PASSWORD || "",
-      opensearchNode: process.env.OPENSEARCH_NODE || "",
     };
   }
 }

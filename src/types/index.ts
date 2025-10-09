@@ -24,9 +24,6 @@ export type ListenerOptions = {
   name: string;
   chain: number;
   providerUrl: string;
-  opensearchUser: string;
-  opensearchPass: string;
-  opensearchNode: string;
 };
 
 export type Webhook = {

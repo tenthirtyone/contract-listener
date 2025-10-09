@@ -3,59 +3,36 @@ export * from "./types";
 import express from "express";
 import { createLogger } from "./logger";
 
-async function main() {
-  /*
-  const ethereum = new Listener({
-    providerUrl: process.env.ETHEREUM_URL,
-    name: "EthereumListener",
-    chain: 1,
-  });
-  await ethereum.start();
-*/
-  //const sepolia = new Listener({
-  //  providerUrl: process.env.SEPOLIA_URL,
-  //  name: "SepoliaListener",
-  //  chain: 11155111,
-  //});
-  //await sepolia.start();
-  /*
-  const amoy = new Listener({
-    providerUrl: process.env.AMOY_URL,
-    name: "AmoyListener",
-    chain: 80002,
-  });
-  await amoy.start();
+interface ListenerConfig {
+  providerUrl: string | undefined;
+  name: string;
+  chain: number;
+}
 
- 
-const polygon = new Listener({
-  providerUrl: process.env.POLYGON_URL,
-  name: "PolygonListener",
-  chain: 137,
-});
-await polygon.start();
-
-*/
-  const base = new Listener({
-    providerUrl: process.env.BASE_URL,
-    name: "BaseListener",
+const LISTENER_CONFIGS: ListenerConfig[] = [
+  {
+    providerUrl: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+    name: "PolygonListener",
     chain: 8453,
-  });
-  await base.start();
-  /*
-  const optimism = new Listener({
-    providerUrl: process.env.OPTIMISM_URL,
-    name: "OptimismListener",
-    chain: 10,
-  });
-  await optimism.start();
+  },
+];
 
-  const arbitrum = new Listener({
-    providerUrl: process.env.ARBITRUM_URL,
-    name: "ArbitrumListener",
-    chain: 42161,
-  });
-  await arbitrum.start();
-  */
+async function main() {
+  const listeners = LISTENER_CONFIGS.filter((config) => config.providerUrl).map(
+    (config) => new Listener(config)
+  );
+
+  await Promise.all(listeners.map((listener) => listener.start()));
+
+  // Add CTFExchange contract to all listeners
+  await Promise.all(
+    listeners.map((listener) =>
+      listener.addContract(
+        "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
+        "CTFExchange"
+      )
+    )
+  );
 }
 main().catch((error) => {
   console.error(error);
@@ -67,6 +44,6 @@ const logger = createLogger("contract-listener");
 const app = express();
 const port = process.env.PORT || 8080;
 
-app.get("/", (req, res) => res.send(true));
+app.get("/", (_req, res) => res.send(true));
 
 app.listen(port, () => logger.info(`Server is running on port ${port}`));
