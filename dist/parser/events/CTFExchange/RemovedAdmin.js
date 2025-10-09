@@ -14,24 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-RemovedAdmin");
 const RemovedAdmin = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [removedAdmin, admin] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            removedAdmin,
-            admin,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [removedAdmin, admin] = parameters;
     logger.info(`Admin removed - Address: ${removedAdmin}, By: ${admin}`);
     // TODO: Update admin status in database
     // For example: await prisma.admin.update({ where: { address: removedAdmin }, data: { active: false } });
-    return data;
 });
 exports.RemovedAdmin = RemovedAdmin;

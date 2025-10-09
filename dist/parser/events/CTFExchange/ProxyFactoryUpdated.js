@@ -14,24 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-ProxyFactoryUpdated");
 const ProxyFactoryUpdated = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [oldProxyFactory, newProxyFactory] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            oldProxyFactory,
-            newProxyFactory,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [oldProxyFactory, newProxyFactory] = parameters;
     logger.info(`Proxy factory updated - Old: ${oldProxyFactory}, New: ${newProxyFactory}`);
     // TODO: Update proxy factory configuration in database
     // For example: await prisma.ctfConfig.update({ where: { key: 'proxyFactory' }, data: { value: newProxyFactory } });
-    return data;
 });
 exports.ProxyFactoryUpdated = ProxyFactoryUpdated;

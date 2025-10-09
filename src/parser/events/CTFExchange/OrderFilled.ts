@@ -3,30 +3,22 @@ import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-OrderFilled");
 
-interface OrderFilledData {
-  orderHash: string;
-  maker: string;
-  taker: string;
-  makerAssetId: string;
-  takerAssetId: string;
-  makerAmountFilled: string;
-  takerAmountFilled: string;
-  fee: string;
-}
-
-interface OrderFilledEvent extends ParsedEvent {
-  data: OrderFilledData;
-}
-
 export const OrderFilled = async (
-  evt: Event,
+  evt: ParsedEvent,
   eventListener: any,
   transaction: any,
   receipt: any,
   context: any
-): Promise<OrderFilledEvent> => {
+): Promise<void> => {
   const { prisma } = context;
-  const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
+  const {
+    blockNumber,
+    blockHash,
+    address,
+    transactionHash,
+    event,
+    parameters,
+  } = evt;
 
   const [
     orderHash,
@@ -37,27 +29,7 @@ export const OrderFilled = async (
     makerAmountFilled,
     takerAmountFilled,
     fee,
-  ] = args;
-
-  const data: OrderFilledEvent = {
-    blockNumber,
-    blockHash,
-    address,
-    transactionHash,
-    event,
-    data: {
-      orderHash,
-      maker,
-      taker,
-      makerAssetId: makerAssetId.toString(),
-      takerAssetId: takerAssetId.toString(),
-      makerAmountFilled: makerAmountFilled.toString(),
-      takerAmountFilled: takerAmountFilled.toString(),
-      fee: fee.toString(),
-    },
-    transaction,
-    receipt,
-  };
+  ] = parameters;
 
   logger.info(
     `Order filled - Hash: ${orderHash}, Maker: ${maker}, Taker: ${taker}`
@@ -67,6 +39,4 @@ export const OrderFilled = async (
   // For example:
   // await prisma.ctfOrder.update({ where: { orderHash }, data: { filled: true } });
   // await prisma.ctfTrade.create({ data: { ... } });
-
-  return data;
 };

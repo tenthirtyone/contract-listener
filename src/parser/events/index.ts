@@ -1,6 +1,5 @@
-export * from "./ProxyDeployed";
-export * from "./TokenMint";
-export * from "./TransferSingle";
-export * from "./Seaport";
-export * from "./Transfer";
-export * from "./CTFExchange";
+import CTFExchange from "./CTFExchange";
+
+export default {
+  parsers: [CTFExchange],
+};

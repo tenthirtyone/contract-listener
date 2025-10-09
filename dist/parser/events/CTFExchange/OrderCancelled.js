@@ -14,23 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-OrderCancelled");
 const OrderCancelled = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [orderHash] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            orderHash,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [orderHash] = parameters;
     logger.info(`Order cancelled - Hash: ${orderHash}`);
     // TODO: Update order status in database
     // For example: await prisma.ctfOrder.update({ where: { orderHash }, data: { cancelled: true } });
-    return data;
 });
 exports.OrderCancelled = OrderCancelled;

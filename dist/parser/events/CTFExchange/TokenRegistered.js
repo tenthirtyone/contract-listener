@@ -14,25 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-TokenRegistered");
 const TokenRegistered = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [token0, token1, conditionId] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            token0: token0.toString(),
-            token1: token1.toString(),
-            conditionId,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [token0, token1, conditionId] = parameters;
     logger.info(`Token registered - Token0: ${token0}, Token1: ${token1}, ConditionId: ${conditionId}`);
     // TODO: Store token registration in database
     // For example: await prisma.ctfTokenPair.create({ data: { token0, token1, conditionId } });
-    return data;
 });
 exports.TokenRegistered = TokenRegistered;

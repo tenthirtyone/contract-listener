@@ -14,23 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-TradingUnpaused");
 const TradingUnpaused = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [pauser] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            pauser,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [pauser] = parameters;
     logger.info(`Trading unpaused by: ${pauser}`);
     // TODO: Update trading status in database
     // For example: await prisma.ctfConfig.update({ where: { key: 'tradingPaused' }, data: { value: false } });
-    return data;
 });
 exports.TradingUnpaused = TradingUnpaused;

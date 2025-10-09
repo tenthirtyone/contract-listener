@@ -14,32 +14,12 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-OrderFilled");
 const OrderFilled = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [orderHash, maker, taker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled, fee,] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            orderHash,
-            maker,
-            taker,
-            makerAssetId: makerAssetId.toString(),
-            takerAssetId: takerAssetId.toString(),
-            makerAmountFilled: makerAmountFilled.toString(),
-            takerAmountFilled: takerAmountFilled.toString(),
-            fee: fee.toString(),
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [orderHash, maker, taker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled, fee,] = parameters;
     logger.info(`Order filled - Hash: ${orderHash}, Maker: ${maker}, Taker: ${taker}`);
     // TODO: Update order status in database and handle trade data
     // For example:
     // await prisma.ctfOrder.update({ where: { orderHash }, data: { filled: true } });
     // await prisma.ctfTrade.create({ data: { ... } });
-    return data;
 });
 exports.OrderFilled = OrderFilled;

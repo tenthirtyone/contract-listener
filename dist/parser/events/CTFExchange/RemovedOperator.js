@@ -14,24 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-RemovedOperator");
 const RemovedOperator = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [removedOperator, admin] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            removedOperator,
-            admin,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [removedOperator, admin] = parameters;
     logger.info(`Operator removed - Address: ${removedOperator}, By: ${admin}`);
     // TODO: Update operator status in database
     // For example: await prisma.operator.update({ where: { address: removedOperator }, data: { active: false } });
-    return data;
 });
 exports.RemovedOperator = RemovedOperator;

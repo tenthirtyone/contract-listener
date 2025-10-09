@@ -30,14 +30,22 @@ export type Webhook = {
   url: string;
 };
 
-export type Event = {
+export type BlockchainEvent = {
   blockNumber: number;
   blockHash: string;
   address: string;
   transactionHash: string;
   event: string;
   args: any;
+  logIndex: number;
+  transactionIndex: number;
+  data?: string;
+  topics?: string[];
+  chainId?: number;
 };
+
+// Legacy alias for backward compatibility
+export type Event = BlockchainEvent;
 
 export interface ParsedEvent {
   blockNumber: number;
@@ -46,32 +54,13 @@ export interface ParsedEvent {
   transactionHash: string;
   event: string;
   data: any;
+  parameters: any;
   transaction?: any;
   receipt?: any;
   price?: number;
 }
 
-export interface TokenMintEvent extends ParsedEvent {
-  data: {
-    to: string;
-    tokenId: number;
-    cid: string;
-  };
-}
-export interface ProxyDeployedEvent extends ParsedEvent {
-  data: {
-    address: string;
-  };
-}
-export interface TransferSingleEvent extends ParsedEvent {
-  data: {
-    operator: string;
-    from: string;
-    to: string;
-    tokenId: number;
-    value: number;
-  };
-}
+// Removed non-CTFExchange event interfaces - only CTFExchange functionality kept
 
 export type EthereumAddress = string;
 

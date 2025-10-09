@@ -14,24 +14,10 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-SafeFactoryUpdated");
 const SafeFactoryUpdated = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [oldSafeFactory, newSafeFactory] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            oldSafeFactory,
-            newSafeFactory,
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [oldSafeFactory, newSafeFactory] = parameters;
     logger.info(`Safe factory updated - Old: ${oldSafeFactory}, New: ${newSafeFactory}`);
     // TODO: Update safe factory configuration in database
     // For example: await prisma.ctfConfig.update({ where: { key: 'safeFactory' }, data: { value: newSafeFactory } });
-    return data;
 });
 exports.SafeFactoryUpdated = SafeFactoryUpdated;

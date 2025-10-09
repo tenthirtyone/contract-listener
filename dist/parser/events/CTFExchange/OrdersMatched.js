@@ -14,29 +14,12 @@ const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-OrdersMatched");
 const OrdersMatched = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { prisma } = context;
-    const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-    const [takerOrderHash, takerOrderMaker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled,] = args;
-    const data = {
-        blockNumber,
-        blockHash,
-        address,
-        transactionHash,
-        event,
-        data: {
-            takerOrderHash,
-            takerOrderMaker,
-            makerAssetId: makerAssetId.toString(),
-            takerAssetId: takerAssetId.toString(),
-            makerAmountFilled: makerAmountFilled.toString(),
-            takerAmountFilled: takerAmountFilled.toString(),
-        },
-        transaction,
-        receipt,
-    };
+    const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
+    const [takerOrderHash, takerOrderMaker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled,] = parameters;
     logger.info(`Orders matched - Taker Order: ${takerOrderHash}, Maker: ${takerOrderMaker}`);
+    console.log("#############");
     // TODO: Update order status and handle matching data
     // For example:
     // await prisma.ctfOrder.update({ where: { orderHash: takerOrderHash }, data: { matched: true } });
-    return data;
 });
 exports.OrdersMatched = OrdersMatched;

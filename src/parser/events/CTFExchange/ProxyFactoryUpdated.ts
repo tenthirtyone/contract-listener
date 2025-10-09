@@ -3,40 +3,24 @@ import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-ProxyFactoryUpdated");
 
-interface ProxyFactoryUpdatedData {
-  oldProxyFactory: string;
-  newProxyFactory: string;
-}
-
-interface ProxyFactoryUpdatedEvent extends ParsedEvent {
-  data: ProxyFactoryUpdatedData;
-}
-
 export const ProxyFactoryUpdated = async (
-  evt: Event,
+  evt: ParsedEvent,
   eventListener: any,
   transaction: any,
   receipt: any,
   context: any
-): Promise<ProxyFactoryUpdatedEvent> => {
+): Promise<void> => {
   const { prisma } = context;
-  const { blockNumber, blockHash, address, transactionHash, event, args } = evt;
-
-  const [oldProxyFactory, newProxyFactory] = args;
-
-  const data: ProxyFactoryUpdatedEvent = {
+  const {
     blockNumber,
     blockHash,
     address,
     transactionHash,
     event,
-    data: {
-      oldProxyFactory,
-      newProxyFactory,
-    },
-    transaction,
-    receipt,
-  };
+    parameters,
+  } = evt;
+
+  const [oldProxyFactory, newProxyFactory] = parameters;
 
   logger.info(
     `Proxy factory updated - Old: ${oldProxyFactory}, New: ${newProxyFactory}`
@@ -44,6 +28,4 @@ export const ProxyFactoryUpdated = async (
 
   // TODO: Update proxy factory configuration in database
   // For example: await prisma.ctfConfig.update({ where: { key: 'proxyFactory' }, data: { value: newProxyFactory } });
-
-  return data;
 };

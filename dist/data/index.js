@@ -13,22 +13,10 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ABIs = void 0;
-__exportStar(require("./contracts"), exports);
 __exportStar(require("./webhooks"), exports);
-const BeaconABI_1 = require("./BeaconABI");
 const CTFExchange_1 = require("./CTFExchange");
-const MultiTokenContract_json_1 = require("./MultiTokenContract.json");
-const ERC721ABI_1 = require("./ERC721ABI");
-const seaportAbi_json_1 = __importDefault(require("./seaportAbi.json"));
 exports.ABIs = {
-    Beacon: BeaconABI_1.abi,
-    ERC1155: MultiTokenContract_json_1.abi,
-    ERC721: ERC721ABI_1.abi,
-    seaport15: seaportAbi_json_1.default,
     CTFExchange: CTFExchange_1.abi,
 };
