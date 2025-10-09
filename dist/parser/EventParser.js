@@ -9,65 +9,69 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EventParser = exports.createEventParser = void 0;
-// Transform raw ethers event to ParsedEvent
-function transformEvent(rawEvent) {
-    return {
-        blockNumber: rawEvent.blockNumber,
-        blockHash: rawEvent.blockHash,
-        address: rawEvent.address,
-        transactionHash: rawEvent.transactionHash,
-        event: rawEvent.event,
-        data: rawEvent.args,
-        parameters: rawEvent.args,
-        transaction: rawEvent.transaction,
-        receipt: rawEvent.receipt,
-    };
-}
-// Dynamic parser registration
-function registerParsers() {
-    const parsers = new Map();
-    try {
-        // Dynamically import all contract parsers
-        const eventsModule = require("./events");
-        if (eventsModule.default && eventsModule.default.parsers) {
-            eventsModule.default.parsers.forEach((contractParsers) => {
-                if (contractParsers && contractParsers.parsers) {
-                    contractParsers.parsers.forEach((parserFunction) => {
-                        if (typeof parserFunction === "function") {
-                            const eventName = parserFunction.name;
-                            parsers.set(eventName, parserFunction);
-                        }
-                    });
-                }
-            });
+exports.EventParsers = void 0;
+class EventParsers {
+    constructor() {
+        this.parsers = this.createParsers();
+    }
+    createParsers() {
+        const result = {};
+        try {
+            const eventsModule = require("./events");
+            if (eventsModule.default && eventsModule.default.parsers) {
+                eventsModule.default.parsers.forEach((contractParsers) => {
+                    if (contractParsers &&
+                        (contractParsers.name || contractParsers.type) &&
+                        contractParsers.parsers) {
+                        const typeName = contractParsers.name || contractParsers.type;
+                        result[typeName] = {};
+                        contractParsers.parsers.forEach((parserFunction) => {
+                            if (typeof parserFunction === "function") {
+                                const eventName = parserFunction.name;
+                                result[typeName][eventName] = (rawEvent, eventListener, transaction, receipt, context) => __awaiter(this, void 0, void 0, function* () {
+                                    const parsedEvent = this.transformEvent(rawEvent);
+                                    yield parserFunction(parsedEvent, eventListener, transaction, receipt, context);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
         }
+        catch (error) {
+            console.error("Failed to register parsers:", error);
+        }
+        return result;
     }
-    catch (error) {
-        console.error("Failed to register parsers:", error);
+    transformEvent(rawEvent) {
+        return {
+            blockNumber: rawEvent.blockNumber,
+            blockHash: rawEvent.blockHash,
+            address: rawEvent.address,
+            transactionHash: rawEvent.transactionHash,
+            event: rawEvent.event,
+            data: rawEvent.args,
+            parameters: rawEvent.args,
+            transaction: rawEvent.transaction,
+            receipt: rawEvent.receipt,
+        };
     }
-    return parsers;
-}
-const registeredParsers = registerParsers();
-function createEventParser() {
-    const parsers = {};
-    registeredParsers.forEach((parserFunction, eventName) => {
-        parsers[eventName] = (rawEvent, eventListener, transaction, receipt, context) => __awaiter(this, void 0, void 0, function* () {
-            const parsedEvent = transformEvent(rawEvent);
-            yield parserFunction(parsedEvent, eventListener, transaction, receipt, context);
+    // Add a parser for a contract type and event name
+    addParser(contractType, eventName, parser) {
+        if (!this.parsers[contractType]) {
+            this.parsers[contractType] = {};
+        }
+        // Wrap the parser function with event transformation
+        this.parsers[contractType][eventName] = (rawEvent, eventListener, transaction, receipt, context) => __awaiter(this, void 0, void 0, function* () {
+            const parsedEvent = this.transformEvent(rawEvent);
+            yield parser(parsedEvent, eventListener, transaction, receipt, context);
         });
-    });
-    return parsers;
-}
-exports.createEventParser = createEventParser;
-class EventParser {
-    static create() {
-        return createEventParser();
     }
-    // Allow manual registration if needed
-    static registerParser(eventName, parser) {
-        registeredParsers.set(eventName, parser);
+    // Add multiple parsers for a contract type
+    addParsers(contractType, parsers) {
+        Object.entries(parsers).forEach(([eventName, parser]) => {
+            this.addParser(contractType, eventName, parser);
+        });
     }
 }
-exports.EventParser = EventParser;
-exports.default = EventParser;
+exports.EventParsers = EventParsers;

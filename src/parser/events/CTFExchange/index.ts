@@ -13,7 +13,7 @@ import { TradingPaused } from "./TradingPaused";
 import { TradingUnpaused } from "./TradingUnpaused";
 
 export default {
-  name: "CTFExchange",
+  type: "CTFExchange",
   parsers: [
     FeeCharged,
     NewAdmin,

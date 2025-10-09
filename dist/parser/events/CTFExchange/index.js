@@ -14,7 +14,7 @@ const TokenRegistered_1 = require("./TokenRegistered");
 const TradingPaused_1 = require("./TradingPaused");
 const TradingUnpaused_1 = require("./TradingUnpaused");
 exports.default = {
-    name: "CTFExchange",
+    type: "CTFExchange",
     parsers: [
         FeeCharged_1.FeeCharged,
         NewAdmin_1.NewAdmin,

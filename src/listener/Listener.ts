@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { ethers } from "ethers";
-import { EventParser, ListenerOptions } from "../types";
-import { createEventParser } from "../parser";
+import { EventParser as TEventParser, ListenerOptions } from "../types";
+import { EventParsers, EventParserLookup } from "../parser";
 import { createLogger } from "../logger";
 import { ABIs } from "../data";
 
@@ -16,9 +16,10 @@ export class Listener {
   private _options: ListenerOptions;
   private _contractInstances: ethers.Contract[] = [];
   private _provider: ethers.providers.JsonRpcProvider;
-  private _eventParsers: EventParser;
+  private _eventParsers: EventParsers;
   private _logger: any;
   private _runtimeContracts: MonitoredContract[] = [];
+  private _contractTypes: Map<string, string> = new Map();
 
   constructor(options?: Partial<ListenerOptions>) {
     this._options = { ...Listener.DEFAULTS, ...options };
@@ -34,7 +35,7 @@ export class Listener {
   }
 
   async start() {
-    this._eventParsers = createEventParser();
+    this._eventParsers = new EventParsers();
     this._logger = createLogger(this._options.name);
 
     await this.initializeContracts();
@@ -47,6 +48,11 @@ export class Listener {
 
     // Add any additional contracts that were registered
     contracts.push(...this._runtimeContracts);
+
+    // Store contract types for lookup
+    contracts.forEach((contract) => {
+      this._contractTypes.set(contract.address.toLowerCase(), contract.type);
+    });
 
     this._contractInstances = contracts.map((contract) => {
       const abi = ABIs[contract.type];
@@ -71,16 +77,23 @@ export class Listener {
       );
 
       try {
-        if (this._eventParsers[event.event]) {
-          // Get transaction and receipt data
-          const transaction = await this._provider.getTransaction(
-            event.transactionHash
-          );
-          const receipt = await this._provider.getTransactionReceipt(
-            event.transactionHash
-          );
+        // Get transaction and receipt data
+        const transaction = await this._provider.getTransaction(
+          event.transactionHash
+        );
+        const receipt = await this._provider.getTransactionReceipt(
+          event.transactionHash
+        );
 
-          await this._eventParsers[event.event](
+        // Get contract type for type-specific parsing
+        const contractType = this.getContractType(contract.address);
+
+        if (
+          contractType &&
+          this._eventParsers.parsers[contractType] &&
+          this._eventParsers.parsers[contractType][event.event]
+        ) {
+          await this._eventParsers.parsers[contractType][event.event](
             event,
             this,
             transaction,
@@ -90,17 +103,6 @@ export class Listener {
               logger: this._logger,
               options: this._options,
             }
-          );
-        } else {
-          console.log(
-            `Event: "${
-              event.event
-            }" received, no matching parser. Available parsers: ${Object.keys(
-              this._eventParsers
-            ).join(", ")}`
-          );
-          this._logger.debug(
-            `Event: ${event.event} received, no matching parser`
           );
         }
       } catch (error) {
@@ -121,6 +123,7 @@ export class Listener {
       this.attachEventHandler(contract);
       this._contractInstances.push(contract);
       this._runtimeContracts.push({ address, type });
+      this._contractTypes.set(address.toLowerCase(), type);
 
       this._logger.info(`Contract ${address} added successfully`);
     } catch (error) {
@@ -149,6 +152,16 @@ export class Listener {
     return { ...this._options };
   }
 
+  // Get the event parsers instance to add custom parsers
+  getParsers(): EventParsers {
+    return this._eventParsers;
+  }
+
+  // Get contract type by address
+  private getContractType(address: string): string | undefined {
+    return this._contractTypes.get(address.toLowerCase());
+  }
+
   // Stop the listener and clean up
   async stop(): Promise<void> {
     this._logger.info("Stopping event listener");
@@ -173,7 +186,6 @@ export class Listener {
       const collections = await this._prisma.collection.findMany({
         where: {
           chain: this._options.chain,
-          is_dcentral: true,
         },
       });
 

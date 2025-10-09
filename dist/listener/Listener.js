@@ -20,6 +20,7 @@ class Listener {
     constructor(options) {
         this._contractInstances = [];
         this._runtimeContracts = [];
+        this._contractTypes = new Map();
         this._options = Object.assign(Object.assign({}, Listener.DEFAULTS), options);
         if (!this._options.providerUrl) {
             throw new Error("No providerUrl provided.");
@@ -29,7 +30,7 @@ class Listener {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            this._eventParsers = (0, parser_1.createEventParser)();
+            this._eventParsers = new parser_1.EventParsers();
             this._logger = (0, logger_1.createLogger)(this._options.name);
             yield this.initializeContracts();
             this.setupEventListeners();
@@ -41,6 +42,10 @@ class Listener {
             const contracts = yield this.loadDatabaseContracts();
             // Add any additional contracts that were registered
             contracts.push(...this._runtimeContracts);
+            // Store contract types for lookup
+            contracts.forEach((contract) => {
+                this._contractTypes.set(contract.address.toLowerCase(), contract.type);
+            });
             this._contractInstances = contracts.map((contract) => {
                 const abi = data_1.ABIs[contract.type];
                 if (!abi) {
@@ -62,19 +67,19 @@ class Listener {
         contract.on("*", (event) => __awaiter(this, void 0, void 0, function* () {
             this._logger.info(`Event: ${event.event} for contract: ${contract.address}`);
             try {
-                if (this._eventParsers[event.event]) {
-                    // Get transaction and receipt data
-                    const transaction = yield this._provider.getTransaction(event.transactionHash);
-                    const receipt = yield this._provider.getTransactionReceipt(event.transactionHash);
-                    yield this._eventParsers[event.event](event, this, transaction, receipt, {
+                // Get transaction and receipt data
+                const transaction = yield this._provider.getTransaction(event.transactionHash);
+                const receipt = yield this._provider.getTransactionReceipt(event.transactionHash);
+                // Get contract type for type-specific parsing
+                const contractType = this.getContractType(contract.address);
+                if (contractType &&
+                    this._eventParsers.parsers[contractType] &&
+                    this._eventParsers.parsers[contractType][event.event]) {
+                    yield this._eventParsers.parsers[contractType][event.event](event, this, transaction, receipt, {
                         prisma: this._prisma,
                         logger: this._logger,
                         options: this._options,
                     });
-                }
-                else {
-                    console.log(`Event: "${event.event}" received, no matching parser. Available parsers: ${Object.keys(this._eventParsers).join(", ")}`);
-                    this._logger.debug(`Event: ${event.event} received, no matching parser`);
                 }
             }
             catch (error) {
@@ -91,6 +96,7 @@ class Listener {
                 this.attachEventHandler(contract);
                 this._contractInstances.push(contract);
                 this._runtimeContracts.push({ address, type });
+                this._contractTypes.set(address.toLowerCase(), type);
                 this._logger.info(`Contract ${address} added successfully`);
             }
             catch (error) {
@@ -114,6 +120,14 @@ class Listener {
     // Get current options
     getOptions() {
         return Object.assign({}, this._options);
+    }
+    // Get the event parsers instance to add custom parsers
+    getParsers() {
+        return this._eventParsers;
+    }
+    // Get contract type by address
+    getContractType(address) {
+        return this._contractTypes.get(address.toLowerCase());
     }
     // Stop the listener and clean up
     stop() {

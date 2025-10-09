@@ -8,84 +8,116 @@ export type EventParserFunction = (
   context: any
 ) => Promise<void>;
 
-// Transform raw ethers event to ParsedEvent
-function transformEvent(rawEvent: any): ParsedEvent {
-  return {
-    blockNumber: rawEvent.blockNumber,
-    blockHash: rawEvent.blockHash,
-    address: rawEvent.address,
-    transactionHash: rawEvent.transactionHash,
-    event: rawEvent.event,
-    data: rawEvent.args, // Map args to parameters for backward compatibility
-    parameters: rawEvent.args, // Keep both for flexibility
-    transaction: rawEvent.transaction,
-    receipt: rawEvent.receipt,
+export type EventParserLookup = {
+  [contractType: string]: {
+    [eventName: string]: (
+      rawEvent: Event,
+      eventListener: any,
+      transaction: any,
+      receipt: any,
+      context: any
+    ) => Promise<void>;
   };
-}
+};
 
-// Dynamic parser registration
-function registerParsers(): Map<string, EventParserFunction> {
-  const parsers = new Map<string, EventParserFunction>();
+export class EventParsers {
+  public parsers: EventParserLookup;
 
-  try {
-    // Dynamically import all contract parsers
-    const eventsModule = require("./events");
-
-    if (eventsModule.default && eventsModule.default.parsers) {
-      eventsModule.default.parsers.forEach((contractParsers: any) => {
-        if (contractParsers && contractParsers.parsers) {
-          contractParsers.parsers.forEach((parserFunction: any) => {
-            if (typeof parserFunction === "function") {
-              const eventName = parserFunction.name;
-              parsers.set(eventName, parserFunction);
-            }
-          });
-        }
-      });
-    }
-  } catch (error) {
-    console.error("Failed to register parsers:", error);
+  constructor() {
+    this.parsers = this.createParsers();
   }
 
-  return parsers;
-}
+  private createParsers(): EventParserLookup {
+    const result: EventParserLookup = {};
 
-const registeredParsers = registerParsers();
+    try {
+      const eventsModule = require("./events");
 
-export function createEventParser(): TEventParser {
-  const parsers: any = {};
+      if (eventsModule.default && eventsModule.default.parsers) {
+        eventsModule.default.parsers.forEach((contractParsers: any) => {
+          if (
+            contractParsers &&
+            (contractParsers.name || contractParsers.type) &&
+            contractParsers.parsers
+          ) {
+            const typeName = contractParsers.name || contractParsers.type;
+            result[typeName] = {};
 
-  registeredParsers.forEach((parserFunction, eventName) => {
-    parsers[eventName] = async (
+            contractParsers.parsers.forEach((parserFunction: any) => {
+              if (typeof parserFunction === "function") {
+                const eventName = parserFunction.name;
+                result[typeName][eventName] = async (
+                  rawEvent: Event,
+                  eventListener: any,
+                  transaction: any,
+                  receipt: any,
+                  context: any
+                ) => {
+                  const parsedEvent = this.transformEvent(rawEvent);
+                  await parserFunction(
+                    parsedEvent,
+                    eventListener,
+                    transaction,
+                    receipt,
+                    context
+                  );
+                };
+              }
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Failed to register parsers:", error);
+    }
+
+    return result;
+  }
+
+  private transformEvent(rawEvent: any): ParsedEvent {
+    return {
+      blockNumber: rawEvent.blockNumber,
+      blockHash: rawEvent.blockHash,
+      address: rawEvent.address,
+      transactionHash: rawEvent.transactionHash,
+      event: rawEvent.event,
+      data: rawEvent.args,
+      parameters: rawEvent.args,
+      transaction: rawEvent.transaction,
+      receipt: rawEvent.receipt,
+    };
+  }
+
+  // Add a parser for a contract type and event name
+  addParser(
+    contractType: string,
+    eventName: string,
+    parser: EventParserFunction
+  ): void {
+    if (!this.parsers[contractType]) {
+      this.parsers[contractType] = {};
+    }
+
+    // Wrap the parser function with event transformation
+    this.parsers[contractType][eventName] = async (
       rawEvent: Event,
       eventListener: any,
       transaction: any,
       receipt: any,
       context: any
     ) => {
-      const parsedEvent = transformEvent(rawEvent);
-      await parserFunction(
-        parsedEvent,
-        eventListener,
-        transaction,
-        receipt,
-        context
-      );
+      const parsedEvent = this.transformEvent(rawEvent);
+      await parser(parsedEvent, eventListener, transaction, receipt, context);
     };
-  });
-
-  return parsers as TEventParser;
-}
-
-export class EventParser {
-  static create() {
-    return createEventParser();
   }
 
-  // Allow manual registration if needed
-  static registerParser(eventName: string, parser: EventParserFunction): void {
-    registeredParsers.set(eventName, parser);
+  // Add multiple parsers for a contract type
+  addParsers(
+    contractType: string,
+    parsers: Record<string, EventParserFunction>
+  ): void {
+    Object.entries(parsers).forEach(([eventName, parser]) => {
+      this.addParser(contractType, eventName, parser);
+    });
   }
 }
-
-export default EventParser;
