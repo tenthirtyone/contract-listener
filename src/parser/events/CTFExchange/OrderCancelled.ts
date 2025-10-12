@@ -1,16 +1,18 @@
 import { createLogger } from "../../../logger";
+import { EventParserFunction } from "../../../types";
 import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-OrderCancelled");
 
-export const OrderCancelled = async (
-  evt: ParsedEvent,
-  eventListener: any,
-  transaction: any,
-  receipt: any,
-  context: any
+
+export const OrderCancelled: EventParserFunction = async (
+  evt,
+  eventListener,
+  transaction,
+  receipt,
+  context
 ): Promise<void> => {
-  const { prisma } = context;
+  const { logger: contextLogger } = context;
   const {
     blockNumber,
     blockHash,
@@ -25,5 +27,5 @@ export const OrderCancelled = async (
   logger.info(`Order cancelled - Hash: ${orderHash}`);
 
   // TODO: Update order status in database
-  // For example: await prisma.ctfOrder.update({ where: { orderHash }, data: { cancelled: true } });
+  // Note: Prisma is not available in library mode - use external database connections
 };

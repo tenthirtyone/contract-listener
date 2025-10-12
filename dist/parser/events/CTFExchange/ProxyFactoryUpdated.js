@@ -13,11 +13,11 @@ exports.ProxyFactoryUpdated = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-ProxyFactoryUpdated");
 const ProxyFactoryUpdated = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [oldProxyFactory, newProxyFactory] = parameters;
     logger.info(`Proxy factory updated - Old: ${oldProxyFactory}, New: ${newProxyFactory}`);
     // TODO: Update proxy factory configuration in database
-    // For example: await prisma.ctfConfig.update({ where: { key: 'proxyFactory' }, data: { value: newProxyFactory } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.ProxyFactoryUpdated = ProxyFactoryUpdated;

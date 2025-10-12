@@ -1,16 +1,18 @@
 import { createLogger } from "../../../logger";
+import { EventParserFunction } from "../../../types";
 import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-RemovedAdmin");
 
-export const RemovedAdmin = async (
-  evt: ParsedEvent,
-  eventListener: any,
-  transaction: any,
-  receipt: any,
-  context: any
+
+export const RemovedAdmin: EventParserFunction = async (
+  evt,
+  eventListener,
+  transaction,
+  receipt,
+  context
 ): Promise<void> => {
-  const { prisma } = context;
+  const { logger: contextLogger } = context;
   const {
     blockNumber,
     blockHash,
@@ -25,5 +27,5 @@ export const RemovedAdmin = async (
   logger.info(`Admin removed - Address: ${removedAdmin}, By: ${admin}`);
 
   // TODO: Update admin status in database
-  // For example: await prisma.admin.update({ where: { address: removedAdmin }, data: { active: false } });
+  // Note: Prisma is not available in library mode - use external database connections
 };

@@ -13,11 +13,11 @@ exports.NewOperator = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-NewOperator");
 const NewOperator = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [newOperatorAddress, admin] = parameters;
     logger.info(`New operator added - Address: ${newOperatorAddress}, By: ${admin}`);
     // TODO: Add database operations for operator tracking if needed
-    // For example: await prisma.operator.create({ data: { address: newOperatorAddress, addedBy: admin } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.NewOperator = NewOperator;

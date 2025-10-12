@@ -1,16 +1,18 @@
 import { createLogger } from "../../../logger";
+import { EventParserFunction } from "../../../types";
 import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-TokenRegistered");
 
-export const TokenRegistered = async (
-  evt: ParsedEvent,
-  eventListener: any,
-  transaction: any,
-  receipt: any,
-  context: any
+
+export const TokenRegistered: EventParserFunction = async (
+  evt,
+  eventListener,
+  transaction,
+  receipt,
+  context
 ): Promise<void> => {
-  const { prisma } = context;
+  const { logger: contextLogger } = context;
   const {
     blockNumber,
     blockHash,
@@ -27,5 +29,5 @@ export const TokenRegistered = async (
   );
 
   // TODO: Store token registration in database
-  // For example: await prisma.ctfTokenPair.create({ data: { token0, token1, conditionId } });
+  // Note: Prisma is not available in library mode - use external database connections
 };

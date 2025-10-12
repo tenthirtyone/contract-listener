@@ -1,16 +1,18 @@
 import { createLogger } from "../../../logger";
+import { EventParserFunction } from "../../../types";
 import { Event, ParsedEvent } from "../../../types";
 
 const logger = createLogger("CTFExchange-RemovedOperator");
 
-export const RemovedOperator = async (
-  evt: ParsedEvent,
-  eventListener: any,
-  transaction: any,
-  receipt: any,
-  context: any
+
+export const RemovedOperator: EventParserFunction = async (
+  evt,
+  eventListener,
+  transaction,
+  receipt,
+  context
 ): Promise<void> => {
-  const { prisma } = context;
+  const { logger: contextLogger } = context;
   const {
     blockNumber,
     blockHash,
@@ -25,5 +27,5 @@ export const RemovedOperator = async (
   logger.info(`Operator removed - Address: ${removedOperator}, By: ${admin}`);
 
   // TODO: Update operator status in database
-  // For example: await prisma.operator.update({ where: { address: removedOperator }, data: { active: false } });
+  // Note: Prisma is not available in library mode - use external database connections
 };

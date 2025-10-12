@@ -13,11 +13,11 @@ exports.FeeCharged = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-FeeCharged");
 const FeeCharged = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [receiver, tokenId, amount] = parameters;
     logger.info(`Fee charged - Receiver: ${receiver.toLowerCase()}, TokenId: ${tokenId.toString()}, Amount: ${amount.toString()}`);
     // TODO: Add database operations for fee tracking if needed
-    // For example: await prisma.feeCharged.create({ data: { ... } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.FeeCharged = FeeCharged;

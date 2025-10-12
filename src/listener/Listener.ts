@@ -81,18 +81,16 @@ export class Listener {
   attachEventHandler(contract: ethers.Contract) {
     this._logger.info(`Listening to events for ${contract.address}`);
     contract.on("*", async (event) => {
-      this._logger.info(
+      this._logger.debug(
         `Event: ${event.event} for contract: ${contract.address}`
       );
 
       try {
-        // Get transaction and receipt data
-        const transaction = await this._provider.getTransaction(
-          event.transactionHash
-        );
-        const receipt = await this._provider.getTransactionReceipt(
-          event.transactionHash
-        );
+        // Get transaction and receipt data synchronously
+        const [transaction, receipt] = await Promise.all([
+          this._provider.getTransaction(event.transactionHash),
+          this._provider.getTransactionReceipt(event.transactionHash),
+        ]);
 
         // Get contract type for type-specific parsing
         const contractType = this.getContractType(contract.address);
@@ -102,6 +100,7 @@ export class Listener {
           this._eventParsers.parsers[contractType] &&
           this._eventParsers.parsers[contractType][event.event]
         ) {
+          // Process synchronously - await each parser
           await this._eventParsers.parsers[contractType][event.event](
             event,
             this,
@@ -111,6 +110,14 @@ export class Listener {
               logger: this._logger,
               options: this._options,
             }
+          );
+        } else {
+          this._logger.warn(
+            `Event: "${
+              event.event
+            }" received for contract type "${contractType}", no matching parser. Available parsers for type: ${Object.keys(
+              this._eventParsers.parsers[contractType] || {}
+            ).join(", ")}`
           );
         }
       } catch (error) {

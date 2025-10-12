@@ -13,7 +13,7 @@ exports.OrdersMatched = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-OrdersMatched");
 const OrdersMatched = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [takerOrderHash, takerOrderMaker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled,] = parameters;
     logger.info(`Orders matched - Taker Order: ${takerOrderHash}, Maker: ${takerOrderMaker}`);

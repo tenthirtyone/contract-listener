@@ -13,11 +13,11 @@ exports.NewAdmin = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-NewAdmin");
 const NewAdmin = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [newAdminAddress, admin] = parameters;
     logger.info(`New admin added - Address: ${newAdminAddress}, By: ${admin}`);
     // TODO: Add database operations for admin tracking if needed
-    // For example: await prisma.admin.create({ data: { address: newAdminAddress, addedBy: admin } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.NewAdmin = NewAdmin;

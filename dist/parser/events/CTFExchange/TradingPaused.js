@@ -13,11 +13,11 @@ exports.TradingPaused = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-TradingPaused");
 const TradingPaused = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [pauser] = parameters;
     logger.info(`Trading paused by: ${pauser}`);
     // TODO: Update trading status in database
-    // For example: await prisma.ctfConfig.update({ where: { key: 'tradingPaused' }, data: { value: true } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.TradingPaused = TradingPaused;

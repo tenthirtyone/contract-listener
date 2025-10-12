@@ -1,16 +1,16 @@
 import { createLogger } from "../../../logger";
-import { ParsedEvent } from "../../../types";
+import { ParsedEvent, EventParserFunction } from "../../../types";
 
 const logger = createLogger("CTFExchange-FeeCharged");
 
-export const FeeCharged = async (
-  evt: ParsedEvent,
-  eventListener: any,
-  transaction: any,
-  receipt: any,
-  context: any
+export const FeeCharged: EventParserFunction = async (
+  evt,
+  eventListener,
+  transaction,
+  receipt,
+  context
 ): Promise<void> => {
-  const { prisma } = context;
+  const { logger: contextLogger } = context;
   const {
     blockNumber,
     blockHash,
@@ -27,5 +27,5 @@ export const FeeCharged = async (
   );
 
   // TODO: Add database operations for fee tracking if needed
-  // For example: await prisma.feeCharged.create({ data: { ... } });
+  // Note: Prisma is not available in library mode - use external database connections
 };

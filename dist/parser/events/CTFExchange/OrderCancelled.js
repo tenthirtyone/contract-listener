@@ -13,11 +13,11 @@ exports.OrderCancelled = void 0;
 const logger_1 = require("../../../logger");
 const logger = (0, logger_1.createLogger)("CTFExchange-OrderCancelled");
 const OrderCancelled = (evt, eventListener, transaction, receipt, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const { prisma } = context;
+    const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [orderHash] = parameters;
     logger.info(`Order cancelled - Hash: ${orderHash}`);
     // TODO: Update order status in database
-    // For example: await prisma.ctfOrder.update({ where: { orderHash }, data: { cancelled: true } });
+    // Note: Prisma is not available in library mode - use external database connections
 });
 exports.OrderCancelled = OrderCancelled;

@@ -16,12 +16,16 @@ const LISTENER_CONFIGS: ListenerConfig[] = [
     providerUrl:
       process.env.ETHEREUM_URL ||
       `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-    name: "TestListener",
+    name: "PolymarketListener",
     chain: 137, // Polygon mainnet
     contracts: [
       {
         address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
         type: "CTFExchange",
+      },
+      {
+        address: "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
+        type: "ConditionalTokenFramework",
       },
     ],
   },

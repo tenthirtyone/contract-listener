@@ -72,24 +72,30 @@ class Listener {
     attachEventHandler(contract) {
         this._logger.info(`Listening to events for ${contract.address}`);
         contract.on("*", (event) => __awaiter(this, void 0, void 0, function* () {
-            this._logger.info(`Event: ${event.event} for contract: ${contract.address}`);
+            this._logger.debug(`Event: ${event.event} for contract: ${contract.address}`);
             try {
-                // Get transaction and receipt data
-                const transaction = yield this._provider.getTransaction(event.transactionHash);
-                const receipt = yield this._provider.getTransactionReceipt(event.transactionHash);
+                // Get transaction and receipt data synchronously
+                const [transaction, receipt] = yield Promise.all([
+                    this._provider.getTransaction(event.transactionHash),
+                    this._provider.getTransactionReceipt(event.transactionHash),
+                ]);
                 // Get contract type for type-specific parsing
                 const contractType = this.getContractType(contract.address);
                 if (contractType &&
                     this._eventParsers.parsers[contractType] &&
                     this._eventParsers.parsers[contractType][event.event]) {
+                    // Process synchronously - await each parser
                     yield this._eventParsers.parsers[contractType][event.event](event, this, transaction, receipt, {
                         logger: this._logger,
                         options: this._options,
                     });
                 }
+                else {
+                    this._logger.warn(`Event: "${event.event}" received for contract type "${contractType}", no matching parser. Available parsers for type: ${Object.keys(this._eventParsers.parsers[contractType] || {}).join(", ")}`);
+                }
             }
             catch (error) {
-                this._logger.error(`Error processing event ${event.event}:`, error);
+                this._logger.error(`Error processing event ${event.event}:`, error instanceof Error ? error.message : error, error instanceof Error ? error.stack : "");
             }
         }));
     }
