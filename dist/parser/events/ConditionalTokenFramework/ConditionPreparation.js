@@ -16,7 +16,7 @@ const ConditionPreparation = (evt, eventListener, transaction, receipt, context)
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [conditionId, oracle, questionId, outcomeSlotCount] = parameters;
-    logger.info(`Condition prepared - ConditionId: ${conditionId}, Oracle: ${oracle}, QuestionId: ${questionId}, OutcomeSlots: ${outcomeSlotCount.toString()}`);
+    logger.info(`Condition prepared - ConditionId: ${conditionId}, Oracle: ${oracle}, QuestionId: ${questionId}, OutcomeSlots: ${outcomeSlotCount}`);
     // TODO: Store condition preparation in database
 });
 exports.ConditionPreparation = ConditionPreparation;

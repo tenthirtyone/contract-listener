@@ -95,7 +95,7 @@ class Listener {
                 }
             }
             catch (error) {
-                this._logger.error(`Error processing event ${event.event}:`, error instanceof Error ? error.message : error, error instanceof Error ? error.stack : "");
+                this._logger.error(`Error processing event ${event.event}:`, error);
             }
         }));
     }

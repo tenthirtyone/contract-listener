@@ -16,7 +16,7 @@ const PositionSplit = (evt, eventListener, transaction, receipt, context) => __a
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [stakeholder, collateralToken, parentCollectionId, conditionId, partition, amount,] = parameters;
-    logger.info(`Position split - Stakeholder: ${stakeholder}, ConditionId: ${conditionId}, Amount: ${amount.toString()}`);
+    logger.info(`Position split - Stakeholder: ${stakeholder}, ConditionId: ${conditionId}, Amount: ${amount}`);
     // TODO: Track position split in database
 });
 exports.PositionSplit = PositionSplit;

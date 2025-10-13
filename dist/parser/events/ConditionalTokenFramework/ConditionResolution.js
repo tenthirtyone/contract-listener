@@ -16,7 +16,7 @@ const ConditionResolution = (evt, eventListener, transaction, receipt, context) 
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [conditionId, oracle, questionId, outcomeSlotCount, payoutNumerators] = parameters;
-    logger.info(`Condition resolved - ConditionId: ${conditionId}, Oracle: ${oracle}, Payouts: ${payoutNumerators.map((p) => p.toString()).join(",")}`);
+    logger.info(`Condition resolved - ConditionId: ${conditionId}, Oracle: ${oracle}, Payouts: ${payoutNumerators}`);
     // TODO: Update condition resolution in database
 });
 exports.ConditionResolution = ConditionResolution;

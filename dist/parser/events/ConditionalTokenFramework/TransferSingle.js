@@ -16,7 +16,7 @@ const TransferSingle = (evt, eventListener, transaction, receipt, context) => __
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [operator, from, to, id, value] = parameters;
-    logger.info(`Transfer single - From: ${from}, To: ${to}, TokenId: ${id.toString()}, Value: ${value.toString()}`);
+    logger.info(`Transfer single - From: ${from}, To: ${to}, TokenId: ${id}, Value: ${value}`);
     // TODO: Track single transfer in database
 });
 exports.TransferSingle = TransferSingle;

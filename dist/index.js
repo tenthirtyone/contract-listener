@@ -38,12 +38,32 @@ const LISTENER_CONFIGS = [
         chain: 137,
         contracts: [
             {
+                address: "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
+                type: "ConditionalTokenFramework",
+            },
+            {
                 address: "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
                 type: "CTFExchange",
             },
             {
-                address: "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
-                type: "ConditionalTokenFramework",
+                address: "0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296",
+                type: "NegRiskAdapter",
+            },
+            {
+                address: "0x2F5e3684cb1F318ec51b00Edba38d79Ac2c0aA9d",
+                type: "UMACTFAdapterV3",
+            },
+            {
+                address: "0x6A9D222616C90FcA5754cd1333cFD9b7fb6a4F74",
+                type: "UMACTFAdapterV2",
+            },
+            {
+                address: "0xCB1822859cEF82Cd2Eb4E6276C7916e692995130",
+                type: "UMACTFAdapterV1",
+            },
+            {
+                address: "0xaacfeea03eb1561c4e67d661e40682bd20e3541b",
+                type: "GnosisSafeFactory",
             },
         ],
     },

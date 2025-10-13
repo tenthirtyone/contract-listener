@@ -16,7 +16,7 @@ const PayoutRedemption = (evt, eventListener, transaction, receipt, context) => 
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [redeemer, collateralToken, parentCollectionId, conditionId, indexSets, payout,] = parameters;
-    logger.info(`Payout redeemed - Redeemer: ${redeemer}, CollateralToken: ${collateralToken}, Payout: ${payout.toString()}`);
+    logger.info(`Payout redeemed - Redeemer: ${redeemer}, CollateralToken: ${collateralToken}, Payout: ${payout}`);
     // TODO: Track payout redemption in database
 });
 exports.PayoutRedemption = PayoutRedemption;

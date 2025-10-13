@@ -16,7 +16,7 @@ const TransferBatch = (evt, eventListener, transaction, receipt, context) => __a
     const { logger: contextLogger } = context;
     const { blockNumber, blockHash, address, transactionHash, event, parameters, } = evt;
     const [operator, from, to, ids, values] = parameters;
-    logger.info(`Transfer batch - From: ${from}, To: ${to}, TokenIds: ${ids.map((id) => id.toString()).join(",")}, Values: ${values.map((v) => v.toString()).join(",")}`);
+    logger.info(`Transfer batch - From: ${from}, To: ${to}, TokenIds: ${ids}, Values: ${values}`);
     // TODO: Track batch transfer in database
 });
 exports.TransferBatch = TransferBatch;
