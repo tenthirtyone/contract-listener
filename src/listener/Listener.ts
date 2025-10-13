@@ -79,7 +79,10 @@ export class Listener {
   }
 
   attachEventHandler(contract: ethers.Contract) {
-    this._logger.info(`Listening to events for ${contract.address}`);
+    const contractType = this.getContractType(contract.address);
+    this._logger.info(
+      `Listening to events for ${contractType} ${contract.address}`
+    );
     contract.on("*", async (event) => {
       this._logger.debug(
         `Event: ${event.event} for contract: ${contract.address}`
@@ -121,7 +124,17 @@ export class Listener {
           );
         }
       } catch (error) {
-        this._logger.error(`Error processing event ${event.event}:`, error);
+        this._logger.error(
+          {
+            event: event.event,
+            contract: contract.address,
+            error:
+              error instanceof Error
+                ? { message: error.message, stack: error.stack }
+                : error,
+          },
+          `Error processing event ${event.event}`
+        );
       }
     });
   }

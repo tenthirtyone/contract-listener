@@ -67,6 +67,8 @@ export interface ParsedEvent {
   blockHash: string;
   address: string;
   transactionHash: string;
+  transactionIndex: number;
+  logIndex: number;
   event: string;
   data: any;
   parameters: any;

@@ -36,10 +36,31 @@ function rgbToAnsi([r, g, b]) {
 }
 
 export function createLogger(name) {
-  const hash = stringToHash(name);
-  const rgb = hashToRGB(hash);
+  // Check if name contains contract-event pattern
+  const parts = name.split("-");
 
-  const ansiColor = rgbToAnsi(rgb);
-  const coloredName = `${ansiColor}${name}\x1b[0m`; // \x1b[0m resets the color
-  return logger.child({ name: coloredName });
+  if (parts.length === 2) {
+    const [contractType, eventName] = parts;
+
+    // Generate consistent color for contract type
+    const contractHash = stringToHash(contractType);
+    const contractRgb = hashToRGB(contractHash);
+    const contractColor = rgbToAnsi(contractRgb);
+
+    // Generate unique color for event name
+    const eventHash = stringToHash(eventName);
+    const eventRgb = hashToRGB(eventHash);
+    const eventColor = rgbToAnsi(eventRgb);
+
+    // Combine with colors: ContractType-EventName
+    const coloredName = `${contractColor}${contractType}\x1b[0m-${eventColor}${eventName}\x1b[0m`;
+    return logger.child({ name: coloredName });
+  } else {
+    // Fallback to single color for non-event loggers
+    const hash = stringToHash(name);
+    const rgb = hashToRGB(hash);
+    const ansiColor = rgbToAnsi(rgb);
+    const coloredName = `${ansiColor}${name}\x1b[0m`;
+    return logger.child({ name: coloredName });
+  }
 }

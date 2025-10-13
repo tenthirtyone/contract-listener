@@ -80,6 +80,8 @@ export class EventParsers {
       blockHash: rawEvent.blockHash,
       address: rawEvent.address,
       transactionHash: rawEvent.transactionHash,
+      transactionIndex: rawEvent.transactionIndex,
+      logIndex: rawEvent.logIndex,
       event: rawEvent.event,
       data: rawEvent.args,
       parameters: rawEvent.args,
