@@ -8,6 +8,7 @@ import {
 import { EventParsers, EventParserLookup } from "../parser";
 import { createLogger } from "../logger";
 import { ABIs } from "../data";
+import { KafkaProducer } from "../kafka";
 
 export interface MonitoredContract extends LibraryContract {}
 
@@ -19,6 +20,7 @@ export class Listener {
   private _logger: any;
   private _runtimeContracts: MonitoredContract[] = [];
   private _contractTypes: Map<string, string> = new Map();
+  private _kafka?: KafkaProducer;
 
   constructor(options: ListenerOptions) {
     this._options = options;
@@ -39,6 +41,15 @@ export class Listener {
   async start() {
     this._eventParsers = new EventParsers();
     this._logger = createLogger(this._options.name);
+
+    // Initialize Kafka if configured
+    if (this._options.kafka) {
+      this._kafka = new KafkaProducer(
+        this._options.kafka.brokers,
+        this._options.kafka.clientId || this._options.name
+      );
+      await this._kafka.connect();
+    }
 
     await this.initializeContracts();
     this.setupEventListeners();
@@ -89,12 +100,6 @@ export class Listener {
       );
 
       try {
-        // Get transaction and receipt data synchronously
-        const [transaction, receipt] = await Promise.all([
-          this._provider.getTransaction(event.transactionHash),
-          this._provider.getTransactionReceipt(event.transactionHash),
-        ]);
-
         // Get contract type for type-specific parsing
         const contractType = this.getContractType(contract.address);
 
@@ -107,11 +112,10 @@ export class Listener {
           await this._eventParsers.parsers[contractType][event.event](
             event,
             this,
-            transaction,
-            receipt,
             {
               logger: this._logger,
               options: this._options,
+              kafka: this._kafka,
             }
           );
         } else {
@@ -194,6 +198,11 @@ export class Listener {
     this._contractInstances.forEach((contract) => {
       contract.removeAllListeners();
     });
+
+    // Disconnect Kafka
+    if (this._kafka) {
+      await this._kafka.disconnect();
+    }
 
     // Clear contracts array
     this._contractInstances = [];

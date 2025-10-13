@@ -3,8 +3,6 @@ import { EventParser as TEventParser, Event, ParsedEvent } from "../types";
 export type EventParserFunction = (
   evt: ParsedEvent,
   eventListener: any,
-  transaction: any,
-  receipt: any,
   context: any
 ) => Promise<void>;
 
@@ -13,8 +11,6 @@ export type EventParserLookup = {
     [eventName: string]: (
       rawEvent: Event,
       eventListener: any,
-      transaction: any,
-      receipt: any,
       context: any
     ) => Promise<void>;
   };
@@ -49,18 +45,10 @@ export class EventParsers {
                 result[typeName][eventName] = async (
                   rawEvent: Event,
                   eventListener: any,
-                  transaction: any,
-                  receipt: any,
                   context: any
                 ) => {
                   const parsedEvent = this.transformEvent(rawEvent);
-                  await parserFunction(
-                    parsedEvent,
-                    eventListener,
-                    transaction,
-                    receipt,
-                    context
-                  );
+                  await parserFunction(parsedEvent, eventListener, context);
                 };
               }
             });
@@ -85,8 +73,6 @@ export class EventParsers {
       event: rawEvent.event,
       data: rawEvent.args,
       parameters: rawEvent.args,
-      transaction: rawEvent.transaction,
-      receipt: rawEvent.receipt,
     };
   }
 
@@ -104,12 +90,10 @@ export class EventParsers {
     this.parsers[contractType][eventName] = async (
       rawEvent: Event,
       eventListener: any,
-      transaction: any,
-      receipt: any,
       context: any
     ) => {
       const parsedEvent = this.transformEvent(rawEvent);
-      await parser(parsedEvent, eventListener, transaction, receipt, context);
+      await parser(parsedEvent, eventListener, context);
     };
   }
 

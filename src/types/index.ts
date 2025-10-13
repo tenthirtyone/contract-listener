@@ -17,6 +17,7 @@ export type EventParser = {
 type EnvironmentContext = {
   logger: any;
   options: ListenerOptions;
+  kafka?: any;
 };
 
 export interface LibraryContract {
@@ -29,8 +30,6 @@ export interface LibraryContract {
 export type EventParserFunction = (
   evt: ParsedEvent,
   eventListener: any,
-  transaction: any,
-  receipt: any,
   context: EnvironmentContext
 ) => Promise<void>;
 
@@ -39,6 +38,10 @@ export type ListenerOptions = {
   chain: number;
   providerUrl: string;
   contracts: LibraryContract[];
+  kafka?: {
+    brokers: string[];
+    clientId?: string;
+  };
 };
 
 export type Webhook = {

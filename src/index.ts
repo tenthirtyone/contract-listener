@@ -9,6 +9,10 @@ interface ListenerConfig {
   name: string;
   chain: number;
   contracts: LibraryContract[];
+  kafka?: {
+    brokers: string[];
+    clientId?: string;
+  };
 }
 
 const LISTENER_CONFIGS: ListenerConfig[] = [
@@ -48,6 +52,12 @@ const LISTENER_CONFIGS: ListenerConfig[] = [
         type: "GnosisSafeFactory",
       },
     ],
+    kafka: process.env.KAFKA_BROKERS
+      ? {
+          brokers: process.env.KAFKA_BROKERS.split(","),
+          clientId: "polymarket-listener",
+        }
+      : undefined,
   },
 ];
 
